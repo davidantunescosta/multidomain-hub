@@ -14,7 +14,608 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      agenda: {
+        Row: {
+          contrato_id: string | null
+          cor: string | null
+          created_at: string | null
+          data_fim: string | null
+          data_inicio: string
+          descricao: string | null
+          dia_todo: boolean | null
+          empresa_id: string | null
+          id: string
+          recorrente: boolean | null
+          reuniao_id: string | null
+          tarefa_id: string | null
+          tipo: string | null
+          titulo: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          contrato_id?: string | null
+          cor?: string | null
+          created_at?: string | null
+          data_fim?: string | null
+          data_inicio: string
+          descricao?: string | null
+          dia_todo?: boolean | null
+          empresa_id?: string | null
+          id?: string
+          recorrente?: boolean | null
+          reuniao_id?: string | null
+          tarefa_id?: string | null
+          tipo?: string | null
+          titulo: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          contrato_id?: string | null
+          cor?: string | null
+          created_at?: string | null
+          data_fim?: string | null
+          data_inicio?: string
+          descricao?: string | null
+          dia_todo?: boolean | null
+          empresa_id?: string | null
+          id?: string
+          recorrente?: boolean | null
+          reuniao_id?: string | null
+          tarefa_id?: string | null
+          tipo?: string | null
+          titulo?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agenda_contrato_id_fkey"
+            columns: ["contrato_id"]
+            isOneToOne: false
+            referencedRelation: "contratos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agenda_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agenda_reuniao_id_fkey"
+            columns: ["reuniao_id"]
+            isOneToOne: false
+            referencedRelation: "reunioes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agenda_tarefa_id_fkey"
+            columns: ["tarefa_id"]
+            isOneToOne: false
+            referencedRelation: "tarefas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contratos: {
+        Row: {
+          arquivo_url: string | null
+          created_at: string | null
+          data_fim: string | null
+          data_inicio: string | null
+          descricao: string | null
+          empresa_id: string
+          id: string
+          nome_cliente: string
+          observacoes: string | null
+          periodicidade: string | null
+          pipeline_id: string | null
+          responsavel_id: string | null
+          status: string
+          updated_at: string | null
+          valor_recorrente: number | null
+          valor_total: number | null
+        }
+        Insert: {
+          arquivo_url?: string | null
+          created_at?: string | null
+          data_fim?: string | null
+          data_inicio?: string | null
+          descricao?: string | null
+          empresa_id: string
+          id?: string
+          nome_cliente: string
+          observacoes?: string | null
+          periodicidade?: string | null
+          pipeline_id?: string | null
+          responsavel_id?: string | null
+          status?: string
+          updated_at?: string | null
+          valor_recorrente?: number | null
+          valor_total?: number | null
+        }
+        Update: {
+          arquivo_url?: string | null
+          created_at?: string | null
+          data_fim?: string | null
+          data_inicio?: string | null
+          descricao?: string | null
+          empresa_id?: string
+          id?: string
+          nome_cliente?: string
+          observacoes?: string | null
+          periodicidade?: string | null
+          pipeline_id?: string | null
+          responsavel_id?: string | null
+          status?: string
+          updated_at?: string | null
+          valor_recorrente?: number | null
+          valor_total?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contratos_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contratos_pipeline_id_fkey"
+            columns: ["pipeline_id"]
+            isOneToOne: false
+            referencedRelation: "pipeline"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contratos_responsavel_id_fkey"
+            columns: ["responsavel_id"]
+            isOneToOne: false
+            referencedRelation: "membros"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      empresas: {
+        Row: {
+          cor_identidade: string
+          created_at: string | null
+          descricao: string | null
+          id: string
+          logo_url: string | null
+          nome: string
+          segmento: string | null
+          status: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          cor_identidade?: string
+          created_at?: string | null
+          descricao?: string | null
+          id?: string
+          logo_url?: string | null
+          nome: string
+          segmento?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          cor_identidade?: string
+          created_at?: string | null
+          descricao?: string | null
+          id?: string
+          logo_url?: string | null
+          nome?: string
+          segmento?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      financeiro: {
+        Row: {
+          categoria: string | null
+          contrato_id: string | null
+          created_at: string | null
+          data_pagamento: string | null
+          data_vencimento: string | null
+          descricao: string
+          empresa_id: string
+          id: string
+          status_pagamento: string
+          tipo: string
+          updated_at: string | null
+          valor: number
+        }
+        Insert: {
+          categoria?: string | null
+          contrato_id?: string | null
+          created_at?: string | null
+          data_pagamento?: string | null
+          data_vencimento?: string | null
+          descricao: string
+          empresa_id: string
+          id?: string
+          status_pagamento?: string
+          tipo: string
+          updated_at?: string | null
+          valor: number
+        }
+        Update: {
+          categoria?: string | null
+          contrato_id?: string | null
+          created_at?: string | null
+          data_pagamento?: string | null
+          data_vencimento?: string | null
+          descricao?: string
+          empresa_id?: string
+          id?: string
+          status_pagamento?: string
+          tipo?: string
+          updated_at?: string | null
+          valor?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financeiro_contrato_id_fkey"
+            columns: ["contrato_id"]
+            isOneToOne: false
+            referencedRelation: "contratos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financeiro_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      membros: {
+        Row: {
+          ativo: boolean | null
+          created_at: string | null
+          email: string | null
+          empresa_id: string
+          id: string
+          nome: string
+          papel: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          created_at?: string | null
+          email?: string | null
+          empresa_id: string
+          id?: string
+          nome: string
+          papel?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          ativo?: boolean | null
+          created_at?: string | null
+          email?: string | null
+          empresa_id?: string
+          id?: string
+          nome?: string
+          papel?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "membros_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notificacoes: {
+        Row: {
+          created_at: string | null
+          empresa_id: string | null
+          id: string
+          lida: boolean | null
+          link_rota: string | null
+          mensagem: string | null
+          tipo: string
+          titulo: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          empresa_id?: string | null
+          id?: string
+          lida?: boolean | null
+          link_rota?: string | null
+          mensagem?: string | null
+          tipo: string
+          titulo: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          empresa_id?: string | null
+          id?: string
+          lida?: boolean | null
+          link_rota?: string | null
+          mensagem?: string | null
+          tipo?: string
+          titulo?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notificacoes_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pipeline: {
+        Row: {
+          contato_email: string | null
+          contato_telefone: string | null
+          created_at: string | null
+          data_fechamento: string | null
+          empresa_id: string
+          empresa_lead: string | null
+          estagio: string
+          id: string
+          nome_lead: string
+          observacoes: string | null
+          origem: string | null
+          probabilidade: number | null
+          responsavel_id: string | null
+          updated_at: string | null
+          user_id: string
+          valor_estimado: number | null
+        }
+        Insert: {
+          contato_email?: string | null
+          contato_telefone?: string | null
+          created_at?: string | null
+          data_fechamento?: string | null
+          empresa_id: string
+          empresa_lead?: string | null
+          estagio?: string
+          id?: string
+          nome_lead: string
+          observacoes?: string | null
+          origem?: string | null
+          probabilidade?: number | null
+          responsavel_id?: string | null
+          updated_at?: string | null
+          user_id: string
+          valor_estimado?: number | null
+        }
+        Update: {
+          contato_email?: string | null
+          contato_telefone?: string | null
+          created_at?: string | null
+          data_fechamento?: string | null
+          empresa_id?: string
+          empresa_lead?: string | null
+          estagio?: string
+          id?: string
+          nome_lead?: string
+          observacoes?: string | null
+          origem?: string | null
+          probabilidade?: number | null
+          responsavel_id?: string | null
+          updated_at?: string | null
+          user_id?: string
+          valor_estimado?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pipeline_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pipeline_responsavel_id_fkey"
+            columns: ["responsavel_id"]
+            isOneToOne: false
+            referencedRelation: "membros"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reunioes: {
+        Row: {
+          contrato_id: string | null
+          created_at: string | null
+          data_hora: string
+          decisoes: string | null
+          duracao_min: number | null
+          empresa_id: string
+          id: string
+          local_ou_link: string | null
+          participantes: string[] | null
+          pauta: string | null
+          pipeline_id: string | null
+          proximos_passos: string | null
+          resumo: string | null
+          status: string
+          tipo: string | null
+          titulo: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          contrato_id?: string | null
+          created_at?: string | null
+          data_hora: string
+          decisoes?: string | null
+          duracao_min?: number | null
+          empresa_id: string
+          id?: string
+          local_ou_link?: string | null
+          participantes?: string[] | null
+          pauta?: string | null
+          pipeline_id?: string | null
+          proximos_passos?: string | null
+          resumo?: string | null
+          status?: string
+          tipo?: string | null
+          titulo: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          contrato_id?: string | null
+          created_at?: string | null
+          data_hora?: string
+          decisoes?: string | null
+          duracao_min?: number | null
+          empresa_id?: string
+          id?: string
+          local_ou_link?: string | null
+          participantes?: string[] | null
+          pauta?: string | null
+          pipeline_id?: string | null
+          proximos_passos?: string | null
+          resumo?: string | null
+          status?: string
+          tipo?: string | null
+          titulo?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reunioes_contrato_id_fkey"
+            columns: ["contrato_id"]
+            isOneToOne: false
+            referencedRelation: "contratos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reunioes_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reunioes_pipeline_id_fkey"
+            columns: ["pipeline_id"]
+            isOneToOne: false
+            referencedRelation: "pipeline"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tarefas: {
+        Row: {
+          concluida_em: string | null
+          contrato_id: string | null
+          created_at: string | null
+          data_limite: string | null
+          descricao: string | null
+          empresa_id: string
+          id: string
+          pipeline_id: string | null
+          prioridade: string
+          responsavel_id: string | null
+          reuniao_id: string | null
+          status: string
+          titulo: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          concluida_em?: string | null
+          contrato_id?: string | null
+          created_at?: string | null
+          data_limite?: string | null
+          descricao?: string | null
+          empresa_id: string
+          id?: string
+          pipeline_id?: string | null
+          prioridade?: string
+          responsavel_id?: string | null
+          reuniao_id?: string | null
+          status?: string
+          titulo: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          concluida_em?: string | null
+          contrato_id?: string | null
+          created_at?: string | null
+          data_limite?: string | null
+          descricao?: string | null
+          empresa_id?: string
+          id?: string
+          pipeline_id?: string | null
+          prioridade?: string
+          responsavel_id?: string | null
+          reuniao_id?: string | null
+          status?: string
+          titulo?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tarefas_contrato_id_fkey"
+            columns: ["contrato_id"]
+            isOneToOne: false
+            referencedRelation: "contratos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tarefas_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tarefas_pipeline_id_fkey"
+            columns: ["pipeline_id"]
+            isOneToOne: false
+            referencedRelation: "pipeline"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tarefas_responsavel_id_fkey"
+            columns: ["responsavel_id"]
+            isOneToOne: false
+            referencedRelation: "membros"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tarefas_reuniao_id_fkey"
+            columns: ["reuniao_id"]
+            isOneToOne: false
+            referencedRelation: "reunioes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
