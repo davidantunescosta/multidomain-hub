@@ -9,51 +9,449 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
+import { Route as SignupRouteImport } from './routes/signup'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
+import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
+import { Route as AuthenticatedTarefasRouteImport } from './routes/_authenticated/tarefas'
+import { Route as AuthenticatedNotificacoesRouteImport } from './routes/_authenticated/notificacoes'
+import { Route as AuthenticatedEmpresasRouteImport } from './routes/_authenticated/empresas'
+import { Route as AuthenticatedAgendaRouteImport } from './routes/_authenticated/agenda'
+import { Route as AuthenticatedEmpresaIdRouteImport } from './routes/_authenticated/empresa.$id'
+import { Route as AuthenticatedEmpresaIdIndexRouteImport } from './routes/_authenticated/empresa.$id.index'
+import { Route as AuthenticatedEmpresaIdTarefasRouteImport } from './routes/_authenticated/empresa.$id.tarefas'
+import { Route as AuthenticatedEmpresaIdReunioesRouteImport } from './routes/_authenticated/empresa.$id.reunioes'
+import { Route as AuthenticatedEmpresaIdPipelineRouteImport } from './routes/_authenticated/empresa.$id.pipeline'
+import { Route as AuthenticatedEmpresaIdFinanceiroRouteImport } from './routes/_authenticated/empresa.$id.financeiro'
+import { Route as AuthenticatedEmpresaIdEquipeRouteImport } from './routes/_authenticated/empresa.$id.equipe'
+import { Route as AuthenticatedEmpresaIdContratosRouteImport } from './routes/_authenticated/empresa.$id.contratos'
+import { Route as AuthenticatedEmpresaIdConfiguracoesRouteImport } from './routes/_authenticated/empresa.$id.configuracoes'
+import { Route as AuthenticatedEmpresaIdAgendaRouteImport } from './routes/_authenticated/empresa.$id.agenda'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRoute = AuthenticatedRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedTarefasRoute = AuthenticatedTarefasRouteImport.update({
+  id: '/tarefas',
+  path: '/tarefas',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedNotificacoesRoute =
+  AuthenticatedNotificacoesRouteImport.update({
+    id: '/notificacoes',
+    path: '/notificacoes',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedEmpresasRoute = AuthenticatedEmpresasRouteImport.update({
+  id: '/empresas',
+  path: '/empresas',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedAgendaRoute = AuthenticatedAgendaRouteImport.update({
+  id: '/agenda',
+  path: '/agenda',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedEmpresaIdRoute = AuthenticatedEmpresaIdRouteImport.update({
+  id: '/empresa/$id',
+  path: '/empresa/$id',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedEmpresaIdIndexRoute =
+  AuthenticatedEmpresaIdIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedEmpresaIdRoute,
+  } as any)
+const AuthenticatedEmpresaIdTarefasRoute =
+  AuthenticatedEmpresaIdTarefasRouteImport.update({
+    id: '/tarefas',
+    path: '/tarefas',
+    getParentRoute: () => AuthenticatedEmpresaIdRoute,
+  } as any)
+const AuthenticatedEmpresaIdReunioesRoute =
+  AuthenticatedEmpresaIdReunioesRouteImport.update({
+    id: '/reunioes',
+    path: '/reunioes',
+    getParentRoute: () => AuthenticatedEmpresaIdRoute,
+  } as any)
+const AuthenticatedEmpresaIdPipelineRoute =
+  AuthenticatedEmpresaIdPipelineRouteImport.update({
+    id: '/pipeline',
+    path: '/pipeline',
+    getParentRoute: () => AuthenticatedEmpresaIdRoute,
+  } as any)
+const AuthenticatedEmpresaIdFinanceiroRoute =
+  AuthenticatedEmpresaIdFinanceiroRouteImport.update({
+    id: '/financeiro',
+    path: '/financeiro',
+    getParentRoute: () => AuthenticatedEmpresaIdRoute,
+  } as any)
+const AuthenticatedEmpresaIdEquipeRoute =
+  AuthenticatedEmpresaIdEquipeRouteImport.update({
+    id: '/equipe',
+    path: '/equipe',
+    getParentRoute: () => AuthenticatedEmpresaIdRoute,
+  } as any)
+const AuthenticatedEmpresaIdContratosRoute =
+  AuthenticatedEmpresaIdContratosRouteImport.update({
+    id: '/contratos',
+    path: '/contratos',
+    getParentRoute: () => AuthenticatedEmpresaIdRoute,
+  } as any)
+const AuthenticatedEmpresaIdConfiguracoesRoute =
+  AuthenticatedEmpresaIdConfiguracoesRouteImport.update({
+    id: '/configuracoes',
+    path: '/configuracoes',
+    getParentRoute: () => AuthenticatedEmpresaIdRoute,
+  } as any)
+const AuthenticatedEmpresaIdAgendaRoute =
+  AuthenticatedEmpresaIdAgendaRouteImport.update({
+    id: '/agenda',
+    path: '/agenda',
+    getParentRoute: () => AuthenticatedEmpresaIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
+  '/': typeof AuthenticatedIndexRoute
+  '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
+  '/agenda': typeof AuthenticatedAgendaRoute
+  '/empresas': typeof AuthenticatedEmpresasRoute
+  '/notificacoes': typeof AuthenticatedNotificacoesRoute
+  '/tarefas': typeof AuthenticatedTarefasRoute
+  '/empresa/$id': typeof AuthenticatedEmpresaIdRouteWithChildren
+  '/empresa/$id/agenda': typeof AuthenticatedEmpresaIdAgendaRoute
+  '/empresa/$id/configuracoes': typeof AuthenticatedEmpresaIdConfiguracoesRoute
+  '/empresa/$id/contratos': typeof AuthenticatedEmpresaIdContratosRoute
+  '/empresa/$id/equipe': typeof AuthenticatedEmpresaIdEquipeRoute
+  '/empresa/$id/financeiro': typeof AuthenticatedEmpresaIdFinanceiroRoute
+  '/empresa/$id/pipeline': typeof AuthenticatedEmpresaIdPipelineRoute
+  '/empresa/$id/reunioes': typeof AuthenticatedEmpresaIdReunioesRoute
+  '/empresa/$id/tarefas': typeof AuthenticatedEmpresaIdTarefasRoute
+  '/empresa/$id/': typeof AuthenticatedEmpresaIdIndexRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
+  '/agenda': typeof AuthenticatedAgendaRoute
+  '/empresas': typeof AuthenticatedEmpresasRoute
+  '/notificacoes': typeof AuthenticatedNotificacoesRoute
+  '/tarefas': typeof AuthenticatedTarefasRoute
+  '/': typeof AuthenticatedIndexRoute
+  '/empresa/$id/agenda': typeof AuthenticatedEmpresaIdAgendaRoute
+  '/empresa/$id/configuracoes': typeof AuthenticatedEmpresaIdConfiguracoesRoute
+  '/empresa/$id/contratos': typeof AuthenticatedEmpresaIdContratosRoute
+  '/empresa/$id/equipe': typeof AuthenticatedEmpresaIdEquipeRoute
+  '/empresa/$id/financeiro': typeof AuthenticatedEmpresaIdFinanceiroRoute
+  '/empresa/$id/pipeline': typeof AuthenticatedEmpresaIdPipelineRoute
+  '/empresa/$id/reunioes': typeof AuthenticatedEmpresaIdReunioesRoute
+  '/empresa/$id/tarefas': typeof AuthenticatedEmpresaIdTarefasRoute
+  '/empresa/$id': typeof AuthenticatedEmpresaIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteWithChildren
+  '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
+  '/_authenticated/agenda': typeof AuthenticatedAgendaRoute
+  '/_authenticated/empresas': typeof AuthenticatedEmpresasRoute
+  '/_authenticated/notificacoes': typeof AuthenticatedNotificacoesRoute
+  '/_authenticated/tarefas': typeof AuthenticatedTarefasRoute
+  '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/empresa/$id': typeof AuthenticatedEmpresaIdRouteWithChildren
+  '/_authenticated/empresa/$id/agenda': typeof AuthenticatedEmpresaIdAgendaRoute
+  '/_authenticated/empresa/$id/configuracoes': typeof AuthenticatedEmpresaIdConfiguracoesRoute
+  '/_authenticated/empresa/$id/contratos': typeof AuthenticatedEmpresaIdContratosRoute
+  '/_authenticated/empresa/$id/equipe': typeof AuthenticatedEmpresaIdEquipeRoute
+  '/_authenticated/empresa/$id/financeiro': typeof AuthenticatedEmpresaIdFinanceiroRoute
+  '/_authenticated/empresa/$id/pipeline': typeof AuthenticatedEmpresaIdPipelineRoute
+  '/_authenticated/empresa/$id/reunioes': typeof AuthenticatedEmpresaIdReunioesRoute
+  '/_authenticated/empresa/$id/tarefas': typeof AuthenticatedEmpresaIdTarefasRoute
+  '/_authenticated/empresa/$id/': typeof AuthenticatedEmpresaIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/signup'
+    | '/agenda'
+    | '/empresas'
+    | '/notificacoes'
+    | '/tarefas'
+    | '/empresa/$id'
+    | '/empresa/$id/agenda'
+    | '/empresa/$id/configuracoes'
+    | '/empresa/$id/contratos'
+    | '/empresa/$id/equipe'
+    | '/empresa/$id/financeiro'
+    | '/empresa/$id/pipeline'
+    | '/empresa/$id/reunioes'
+    | '/empresa/$id/tarefas'
+    | '/empresa/$id/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/login'
+    | '/signup'
+    | '/agenda'
+    | '/empresas'
+    | '/notificacoes'
+    | '/tarefas'
+    | '/'
+    | '/empresa/$id/agenda'
+    | '/empresa/$id/configuracoes'
+    | '/empresa/$id/contratos'
+    | '/empresa/$id/equipe'
+    | '/empresa/$id/financeiro'
+    | '/empresa/$id/pipeline'
+    | '/empresa/$id/reunioes'
+    | '/empresa/$id/tarefas'
+    | '/empresa/$id'
+  id:
+    | '__root__'
+    | '/_authenticated'
+    | '/login'
+    | '/signup'
+    | '/_authenticated/agenda'
+    | '/_authenticated/empresas'
+    | '/_authenticated/notificacoes'
+    | '/_authenticated/tarefas'
+    | '/_authenticated/'
+    | '/_authenticated/empresa/$id'
+    | '/_authenticated/empresa/$id/agenda'
+    | '/_authenticated/empresa/$id/configuracoes'
+    | '/_authenticated/empresa/$id/contratos'
+    | '/_authenticated/empresa/$id/equipe'
+    | '/_authenticated/empresa/$id/financeiro'
+    | '/_authenticated/empresa/$id/pipeline'
+    | '/_authenticated/empresa/$id/reunioes'
+    | '/_authenticated/empresa/$id/tarefas'
+    | '/_authenticated/empresa/$id/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
+  AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
+  LoginRoute: typeof LoginRoute
+  SignupRoute: typeof SignupRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/': {
+      id: '/_authenticated/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/tarefas': {
+      id: '/_authenticated/tarefas'
+      path: '/tarefas'
+      fullPath: '/tarefas'
+      preLoaderRoute: typeof AuthenticatedTarefasRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/notificacoes': {
+      id: '/_authenticated/notificacoes'
+      path: '/notificacoes'
+      fullPath: '/notificacoes'
+      preLoaderRoute: typeof AuthenticatedNotificacoesRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/empresas': {
+      id: '/_authenticated/empresas'
+      path: '/empresas'
+      fullPath: '/empresas'
+      preLoaderRoute: typeof AuthenticatedEmpresasRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/agenda': {
+      id: '/_authenticated/agenda'
+      path: '/agenda'
+      fullPath: '/agenda'
+      preLoaderRoute: typeof AuthenticatedAgendaRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/empresa/$id': {
+      id: '/_authenticated/empresa/$id'
+      path: '/empresa/$id'
+      fullPath: '/empresa/$id'
+      preLoaderRoute: typeof AuthenticatedEmpresaIdRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/empresa/$id/': {
+      id: '/_authenticated/empresa/$id/'
+      path: '/'
+      fullPath: '/empresa/$id/'
+      preLoaderRoute: typeof AuthenticatedEmpresaIdIndexRouteImport
+      parentRoute: typeof AuthenticatedEmpresaIdRoute
+    }
+    '/_authenticated/empresa/$id/tarefas': {
+      id: '/_authenticated/empresa/$id/tarefas'
+      path: '/tarefas'
+      fullPath: '/empresa/$id/tarefas'
+      preLoaderRoute: typeof AuthenticatedEmpresaIdTarefasRouteImport
+      parentRoute: typeof AuthenticatedEmpresaIdRoute
+    }
+    '/_authenticated/empresa/$id/reunioes': {
+      id: '/_authenticated/empresa/$id/reunioes'
+      path: '/reunioes'
+      fullPath: '/empresa/$id/reunioes'
+      preLoaderRoute: typeof AuthenticatedEmpresaIdReunioesRouteImport
+      parentRoute: typeof AuthenticatedEmpresaIdRoute
+    }
+    '/_authenticated/empresa/$id/pipeline': {
+      id: '/_authenticated/empresa/$id/pipeline'
+      path: '/pipeline'
+      fullPath: '/empresa/$id/pipeline'
+      preLoaderRoute: typeof AuthenticatedEmpresaIdPipelineRouteImport
+      parentRoute: typeof AuthenticatedEmpresaIdRoute
+    }
+    '/_authenticated/empresa/$id/financeiro': {
+      id: '/_authenticated/empresa/$id/financeiro'
+      path: '/financeiro'
+      fullPath: '/empresa/$id/financeiro'
+      preLoaderRoute: typeof AuthenticatedEmpresaIdFinanceiroRouteImport
+      parentRoute: typeof AuthenticatedEmpresaIdRoute
+    }
+    '/_authenticated/empresa/$id/equipe': {
+      id: '/_authenticated/empresa/$id/equipe'
+      path: '/equipe'
+      fullPath: '/empresa/$id/equipe'
+      preLoaderRoute: typeof AuthenticatedEmpresaIdEquipeRouteImport
+      parentRoute: typeof AuthenticatedEmpresaIdRoute
+    }
+    '/_authenticated/empresa/$id/contratos': {
+      id: '/_authenticated/empresa/$id/contratos'
+      path: '/contratos'
+      fullPath: '/empresa/$id/contratos'
+      preLoaderRoute: typeof AuthenticatedEmpresaIdContratosRouteImport
+      parentRoute: typeof AuthenticatedEmpresaIdRoute
+    }
+    '/_authenticated/empresa/$id/configuracoes': {
+      id: '/_authenticated/empresa/$id/configuracoes'
+      path: '/configuracoes'
+      fullPath: '/empresa/$id/configuracoes'
+      preLoaderRoute: typeof AuthenticatedEmpresaIdConfiguracoesRouteImport
+      parentRoute: typeof AuthenticatedEmpresaIdRoute
+    }
+    '/_authenticated/empresa/$id/agenda': {
+      id: '/_authenticated/empresa/$id/agenda'
+      path: '/agenda'
+      fullPath: '/empresa/$id/agenda'
+      preLoaderRoute: typeof AuthenticatedEmpresaIdAgendaRouteImport
+      parentRoute: typeof AuthenticatedEmpresaIdRoute
     }
   }
 }
 
+interface AuthenticatedEmpresaIdRouteChildren {
+  AuthenticatedEmpresaIdAgendaRoute: typeof AuthenticatedEmpresaIdAgendaRoute
+  AuthenticatedEmpresaIdConfiguracoesRoute: typeof AuthenticatedEmpresaIdConfiguracoesRoute
+  AuthenticatedEmpresaIdContratosRoute: typeof AuthenticatedEmpresaIdContratosRoute
+  AuthenticatedEmpresaIdEquipeRoute: typeof AuthenticatedEmpresaIdEquipeRoute
+  AuthenticatedEmpresaIdFinanceiroRoute: typeof AuthenticatedEmpresaIdFinanceiroRoute
+  AuthenticatedEmpresaIdPipelineRoute: typeof AuthenticatedEmpresaIdPipelineRoute
+  AuthenticatedEmpresaIdReunioesRoute: typeof AuthenticatedEmpresaIdReunioesRoute
+  AuthenticatedEmpresaIdTarefasRoute: typeof AuthenticatedEmpresaIdTarefasRoute
+  AuthenticatedEmpresaIdIndexRoute: typeof AuthenticatedEmpresaIdIndexRoute
+}
+
+const AuthenticatedEmpresaIdRouteChildren: AuthenticatedEmpresaIdRouteChildren =
+  {
+    AuthenticatedEmpresaIdAgendaRoute: AuthenticatedEmpresaIdAgendaRoute,
+    AuthenticatedEmpresaIdConfiguracoesRoute:
+      AuthenticatedEmpresaIdConfiguracoesRoute,
+    AuthenticatedEmpresaIdContratosRoute: AuthenticatedEmpresaIdContratosRoute,
+    AuthenticatedEmpresaIdEquipeRoute: AuthenticatedEmpresaIdEquipeRoute,
+    AuthenticatedEmpresaIdFinanceiroRoute:
+      AuthenticatedEmpresaIdFinanceiroRoute,
+    AuthenticatedEmpresaIdPipelineRoute: AuthenticatedEmpresaIdPipelineRoute,
+    AuthenticatedEmpresaIdReunioesRoute: AuthenticatedEmpresaIdReunioesRoute,
+    AuthenticatedEmpresaIdTarefasRoute: AuthenticatedEmpresaIdTarefasRoute,
+    AuthenticatedEmpresaIdIndexRoute: AuthenticatedEmpresaIdIndexRoute,
+  }
+
+const AuthenticatedEmpresaIdRouteWithChildren =
+  AuthenticatedEmpresaIdRoute._addFileChildren(
+    AuthenticatedEmpresaIdRouteChildren,
+  )
+
+interface AuthenticatedRouteChildren {
+  AuthenticatedAgendaRoute: typeof AuthenticatedAgendaRoute
+  AuthenticatedEmpresasRoute: typeof AuthenticatedEmpresasRoute
+  AuthenticatedNotificacoesRoute: typeof AuthenticatedNotificacoesRoute
+  AuthenticatedTarefasRoute: typeof AuthenticatedTarefasRoute
+  AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedEmpresaIdRoute: typeof AuthenticatedEmpresaIdRouteWithChildren
+}
+
+const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedAgendaRoute: AuthenticatedAgendaRoute,
+  AuthenticatedEmpresasRoute: AuthenticatedEmpresasRoute,
+  AuthenticatedNotificacoesRoute: AuthenticatedNotificacoesRoute,
+  AuthenticatedTarefasRoute: AuthenticatedTarefasRoute,
+  AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedEmpresaIdRoute: AuthenticatedEmpresaIdRouteWithChildren,
+}
+
+const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
+  AuthenticatedRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
+  AuthenticatedRoute: AuthenticatedRouteWithChildren,
+  LoginRoute: LoginRoute,
+  SignupRoute: SignupRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
