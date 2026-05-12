@@ -17,7 +17,7 @@ const ESTAGIOS = [
   { id: "perdido", label: "Perdido" },
 ] as const;
 
-export const Route = createFileRoute("/_authenticated/empresa/pipeline")({
+export const Route = createFileRoute("/_authenticated/empresa/$id/pipeline")({
   component: Pipeline,
 });
 

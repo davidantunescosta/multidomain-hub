@@ -5,7 +5,7 @@ import { ArrowLeft } from "lucide-react";
 import { useCommandPalette } from "@/components/layout/palette-store";
 import { NotificationsBell } from "@/components/layout/NotificationsBell";
 
-export const Route = createFileRoute("/_authenticated/empresa/")({
+export const Route = createFileRoute("/_authenticated/empresa/$id")({
   component: WorkspaceLayout,
 });
 

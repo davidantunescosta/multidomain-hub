@@ -10,7 +10,7 @@ import { EmptyState } from "@/components/nexus/EmptyState";
 import { FileText, Plus } from "lucide-react";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/_authenticated/empresa/contratos")({ component: Contratos });
+export const Route = createFileRoute("/_authenticated/empresa/$id/contratos")({ component: Contratos });
 
 function Contratos() {
   const { id: empresa_id } = useParams({ from: "/_authenticated/empresa/$id/contratos" });
