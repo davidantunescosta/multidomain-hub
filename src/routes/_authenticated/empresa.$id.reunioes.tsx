@@ -83,9 +83,9 @@ function Reunioes() {
                       )}
                       {isLink && <ExternalLink className="size-3 text-muted-foreground" />}
                     </div>
-                    {r.participantes?.length > 0 && (
+                    {(r.participantes?.length ?? 0) > 0 && (
                       <div className="flex flex-wrap gap-1 mt-1.5">
-                        {r.participantes.map((p: string, i: number) => (
+                        {(r.participantes ?? []).map((p: string, i: number) => (
                           <span key={i} className="text-[10px] px-1.5 py-0.5 rounded bg-background border border-border text-muted-foreground">{p}</span>
                         ))}
                       </div>
@@ -220,9 +220,9 @@ function ReuniaoDrawer({ empresa_id, reuniao, onClose }: { empresa_id: string; r
   const createTasks = useMutation({
     mutationFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      const linhas = (docs.proximos_passos || "").split("\n").map(s => s.trim()).filter(Boolean);
+      const linhas = (docs.proximos_passos || "").split("\n").map((s: string) => s.trim()).filter(Boolean);
       if (!linhas.length) throw new Error("Sem próximos passos definidos.");
-      const rows = linhas.map(t => ({
+      const rows = linhas.map((t: string) => ({
         empresa_id, user_id: user!.id, titulo: t, prioridade: "media", status: "aberta", reuniao_id: reuniao.id,
       }));
       const { error } = await supabase.from("tarefas").insert(rows);
