@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { LayoutGrid, CalendarDays, CheckSquare, Building2, Bell, Settings, LogOut, ChevronLeft, ChevronRight } from "lucide-react";
+import { LayoutGrid, CalendarDays, CheckSquare, Building2, Bell, Settings, LogOut, ChevronLeft, ChevronRight, Shield } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth";
@@ -36,6 +36,16 @@ export function Sidebar() {
     },
     enabled: !!user,
     refetchInterval: 30000,
+  });
+
+  const { data: isAdmin } = useQuery({
+    queryKey: ["is-admin", user?.id],
+    queryFn: async () => {
+      const { data } = await supabase.from("user_roles").select("role")
+        .eq("user_id", user!.id).eq("role", "admin").maybeSingle();
+      return !!data;
+    },
+    enabled: !!user,
   });
 
   return (
@@ -87,6 +97,18 @@ export function Sidebar() {
                 );
               })}
             </div>
+            {isAdmin && (
+              <>
+                <div className="mt-5 mb-1 px-3 text-[10px] font-mono uppercase tracking-wider text-muted-foreground">Sistema</div>
+                <div className="px-2 space-y-0.5">
+                  <Link to="/admin"
+                    className={`flex items-center gap-2 h-8 px-2 rounded text-sm ${path.startsWith("/admin") ? "bg-accent text-foreground" : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"}`}>
+                    <Shield className="size-4 shrink-0 text-primary"/>
+                    <span className="flex-1 truncate">Administração</span>
+                  </Link>
+                </div>
+              </>
+            )}
           </>
         )}
       </nav>
