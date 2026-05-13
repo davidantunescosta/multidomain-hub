@@ -66,7 +66,7 @@ function Agenda() {
 
       {isLoading ? <ListSkeleton /> : view === "mes" ? (
         <MonthView cursor={cursor} setCursor={setCursor} events={data ?? []} eventColor={eventColor}
-          onDayClick={(d, hasEvents) => hasEvents ? setSelected(d) : setCreating({ date: d })}
+          onDayClick={(d: Date, hasEvents: boolean) => hasEvents ? setSelected(d) : setCreating({ date: d })}
           selected={selected} onEditEvent={setEditing} />
       ) : view === "semana" ? (
         <WeekView cursor={cursor} setCursor={setCursor} events={data ?? []} eventColor={eventColor} onEditEvent={setEditing} />
