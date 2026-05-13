@@ -23,6 +23,7 @@ import { Route as AuthenticatedEmpresaIdIndexRouteImport } from './routes/_authe
 import { Route as AuthenticatedEmpresaIdTarefasRouteImport } from './routes/_authenticated/empresa.$id.tarefas'
 import { Route as AuthenticatedEmpresaIdReunioesRouteImport } from './routes/_authenticated/empresa.$id.reunioes'
 import { Route as AuthenticatedEmpresaIdPipelineRouteImport } from './routes/_authenticated/empresa.$id.pipeline'
+import { Route as AuthenticatedEmpresaIdFinanceiroRouteImport } from './routes/_authenticated/empresa.$id.financeiro'
 import { Route as AuthenticatedEmpresaIdEquipeRouteImport } from './routes/_authenticated/empresa.$id.equipe'
 import { Route as AuthenticatedEmpresaIdContratosRouteImport } from './routes/_authenticated/empresa.$id.contratos'
 import { Route as AuthenticatedEmpresaIdConfiguracoesRouteImport } from './routes/_authenticated/empresa.$id.configuracoes'
@@ -102,6 +103,12 @@ const AuthenticatedEmpresaIdPipelineRoute =
     path: '/pipeline',
     getParentRoute: () => AuthenticatedEmpresaIdRoute,
   } as any)
+const AuthenticatedEmpresaIdFinanceiroRoute =
+  AuthenticatedEmpresaIdFinanceiroRouteImport.update({
+    id: '/financeiro',
+    path: '/financeiro',
+    getParentRoute: () => AuthenticatedEmpresaIdRoute,
+  } as any)
 const AuthenticatedEmpresaIdEquipeRoute =
   AuthenticatedEmpresaIdEquipeRouteImport.update({
     id: '/equipe',
@@ -141,6 +148,7 @@ export interface FileRoutesByFullPath {
   '/empresa/$id/configuracoes': typeof AuthenticatedEmpresaIdConfiguracoesRoute
   '/empresa/$id/contratos': typeof AuthenticatedEmpresaIdContratosRoute
   '/empresa/$id/equipe': typeof AuthenticatedEmpresaIdEquipeRoute
+  '/empresa/$id/financeiro': typeof AuthenticatedEmpresaIdFinanceiroRoute
   '/empresa/$id/pipeline': typeof AuthenticatedEmpresaIdPipelineRoute
   '/empresa/$id/reunioes': typeof AuthenticatedEmpresaIdReunioesRoute
   '/empresa/$id/tarefas': typeof AuthenticatedEmpresaIdTarefasRoute
@@ -159,6 +167,7 @@ export interface FileRoutesByTo {
   '/empresa/$id/configuracoes': typeof AuthenticatedEmpresaIdConfiguracoesRoute
   '/empresa/$id/contratos': typeof AuthenticatedEmpresaIdContratosRoute
   '/empresa/$id/equipe': typeof AuthenticatedEmpresaIdEquipeRoute
+  '/empresa/$id/financeiro': typeof AuthenticatedEmpresaIdFinanceiroRoute
   '/empresa/$id/pipeline': typeof AuthenticatedEmpresaIdPipelineRoute
   '/empresa/$id/reunioes': typeof AuthenticatedEmpresaIdReunioesRoute
   '/empresa/$id/tarefas': typeof AuthenticatedEmpresaIdTarefasRoute
@@ -180,6 +189,7 @@ export interface FileRoutesById {
   '/_authenticated/empresa/$id/configuracoes': typeof AuthenticatedEmpresaIdConfiguracoesRoute
   '/_authenticated/empresa/$id/contratos': typeof AuthenticatedEmpresaIdContratosRoute
   '/_authenticated/empresa/$id/equipe': typeof AuthenticatedEmpresaIdEquipeRoute
+  '/_authenticated/empresa/$id/financeiro': typeof AuthenticatedEmpresaIdFinanceiroRoute
   '/_authenticated/empresa/$id/pipeline': typeof AuthenticatedEmpresaIdPipelineRoute
   '/_authenticated/empresa/$id/reunioes': typeof AuthenticatedEmpresaIdReunioesRoute
   '/_authenticated/empresa/$id/tarefas': typeof AuthenticatedEmpresaIdTarefasRoute
@@ -201,6 +211,7 @@ export interface FileRouteTypes {
     | '/empresa/$id/configuracoes'
     | '/empresa/$id/contratos'
     | '/empresa/$id/equipe'
+    | '/empresa/$id/financeiro'
     | '/empresa/$id/pipeline'
     | '/empresa/$id/reunioes'
     | '/empresa/$id/tarefas'
@@ -219,6 +230,7 @@ export interface FileRouteTypes {
     | '/empresa/$id/configuracoes'
     | '/empresa/$id/contratos'
     | '/empresa/$id/equipe'
+    | '/empresa/$id/financeiro'
     | '/empresa/$id/pipeline'
     | '/empresa/$id/reunioes'
     | '/empresa/$id/tarefas'
@@ -239,6 +251,7 @@ export interface FileRouteTypes {
     | '/_authenticated/empresa/$id/configuracoes'
     | '/_authenticated/empresa/$id/contratos'
     | '/_authenticated/empresa/$id/equipe'
+    | '/_authenticated/empresa/$id/financeiro'
     | '/_authenticated/empresa/$id/pipeline'
     | '/_authenticated/empresa/$id/reunioes'
     | '/_authenticated/empresa/$id/tarefas'
@@ -351,6 +364,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedEmpresaIdPipelineRouteImport
       parentRoute: typeof AuthenticatedEmpresaIdRoute
     }
+    '/_authenticated/empresa/$id/financeiro': {
+      id: '/_authenticated/empresa/$id/financeiro'
+      path: '/financeiro'
+      fullPath: '/empresa/$id/financeiro'
+      preLoaderRoute: typeof AuthenticatedEmpresaIdFinanceiroRouteImport
+      parentRoute: typeof AuthenticatedEmpresaIdRoute
+    }
     '/_authenticated/empresa/$id/equipe': {
       id: '/_authenticated/empresa/$id/equipe'
       path: '/equipe'
@@ -387,6 +407,7 @@ interface AuthenticatedEmpresaIdRouteChildren {
   AuthenticatedEmpresaIdConfiguracoesRoute: typeof AuthenticatedEmpresaIdConfiguracoesRoute
   AuthenticatedEmpresaIdContratosRoute: typeof AuthenticatedEmpresaIdContratosRoute
   AuthenticatedEmpresaIdEquipeRoute: typeof AuthenticatedEmpresaIdEquipeRoute
+  AuthenticatedEmpresaIdFinanceiroRoute: typeof AuthenticatedEmpresaIdFinanceiroRoute
   AuthenticatedEmpresaIdPipelineRoute: typeof AuthenticatedEmpresaIdPipelineRoute
   AuthenticatedEmpresaIdReunioesRoute: typeof AuthenticatedEmpresaIdReunioesRoute
   AuthenticatedEmpresaIdTarefasRoute: typeof AuthenticatedEmpresaIdTarefasRoute
@@ -400,6 +421,8 @@ const AuthenticatedEmpresaIdRouteChildren: AuthenticatedEmpresaIdRouteChildren =
       AuthenticatedEmpresaIdConfiguracoesRoute,
     AuthenticatedEmpresaIdContratosRoute: AuthenticatedEmpresaIdContratosRoute,
     AuthenticatedEmpresaIdEquipeRoute: AuthenticatedEmpresaIdEquipeRoute,
+    AuthenticatedEmpresaIdFinanceiroRoute:
+      AuthenticatedEmpresaIdFinanceiroRoute,
     AuthenticatedEmpresaIdPipelineRoute: AuthenticatedEmpresaIdPipelineRoute,
     AuthenticatedEmpresaIdReunioesRoute: AuthenticatedEmpresaIdReunioesRoute,
     AuthenticatedEmpresaIdTarefasRoute: AuthenticatedEmpresaIdTarefasRoute,
