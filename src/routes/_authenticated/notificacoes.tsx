@@ -6,7 +6,7 @@ import { Header } from "@/components/layout/Header";
 import { ListSkeleton } from "@/components/nexus/ListSkeleton";
 import { EmptyState } from "@/components/nexus/EmptyState";
 import { relativeTime } from "@/lib/format";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/lib/auth";
 import { Bell, CheckSquare, FileText, AlertTriangle, TrendingUp, CheckCheck } from "lucide-react";
 import { toast } from "sonner";
 
