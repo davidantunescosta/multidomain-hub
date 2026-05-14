@@ -130,6 +130,12 @@ function LeadCard({ lead, onClick }: any) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: lead.id });
   const style = transform ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` } : undefined;
   const dias = Math.floor((Date.now() - new Date(lead.updated_at).getTime()) / 86400000);
+  const diasCls = dias >= 14
+    ? "text-destructive font-semibold"
+    : dias >= 7
+    ? "text-amber-400"
+    : "text-muted-foreground";
+  const diasLabel = dias >= 14 ? `⚠ ${dias}d` : `${dias}d`;
   return (
     <div ref={setNodeRef} style={style} {...attributes} {...listeners}
       className={`bg-background border border-border rounded p-2.5 cursor-grab active:cursor-grabbing ${isDragging?"opacity-50":""}`}
@@ -138,7 +144,7 @@ function LeadCard({ lead, onClick }: any) {
       {lead.empresa_lead && <div className="text-[11px] text-muted-foreground truncate">{lead.empresa_lead}</div>}
       <div className="flex items-center justify-between mt-2">
         <span className="font-mono text-[11px]">{fmtBRL(lead.valor_estimado)}</span>
-        <span className="text-[10px] text-muted-foreground">há {dias}d</span>
+        <span className={`text-[10px] ${diasCls}`}>{diasLabel}</span>
       </div>
       {lead.probabilidade != null && (
         <div className="mt-2 h-1 bg-border rounded overflow-hidden">
