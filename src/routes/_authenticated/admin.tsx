@@ -454,6 +454,17 @@ function ClienteDrawer({ clienteId, onClose }: { clienteId: string | null; onClo
             <Field label="Máx empresas"><input type="number" value={formCliente.max_empresas ?? 0} onChange={e => setEdit({...formCliente, max_empresas: +e.target.value})} className="input"/></Field>
             <Field label="Máx usuários"><input type="number" value={formCliente.max_usuarios ?? 0} onChange={e => setEdit({...formCliente, max_usuarios: +e.target.value})} className="input"/></Field>
           </div>
+          <div className="rounded-md border border-border bg-background/50 p-3 text-xs space-y-2">
+            <div className="text-muted-foreground">{PLANO_DESC[formCliente.plano ?? "basico"]}</div>
+            <div className="flex flex-wrap gap-1">
+              {(((edit && PLANO_MODULOS[formCliente.plano]) ?? (cliente as any)?.modulos_liberados ?? []) as string[]).map(m => (
+                <span key={m} className="text-[10px] px-1.5 py-0.5 rounded bg-muted border border-border capitalize">{m}</span>
+              ))}
+            </div>
+            {edit && cliente?.plano !== formCliente.plano && (
+              <div className="text-amber-400">Salvar atualizará os módulos liberados conforme o novo plano.</div>
+            )}
+          </div>
           <Field label="Observações"><textarea value={formCliente.observacoes ?? ""} onChange={e => setEdit({...formCliente, observacoes: e.target.value})} className="input" rows={3}/></Field>
           <button onClick={() => salvar.mutate()} disabled={!edit || salvar.isPending}
             className="h-8 px-3 rounded-md bg-primary text-primary-foreground text-xs font-medium disabled:opacity-50">
