@@ -251,21 +251,29 @@ function NovoClienteDrawer({ open, onOpenChange, onCreated }: { open: boolean; o
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [plano, setPlano] = useState("basico");
-  const [maxEmp, setMaxEmp] = useState(3);
-  const [maxUsu, setMaxUsu] = useState(5);
+  const [maxEmp, setMaxEmp] = useState(PLANO_LIMITES.basico.max_empresas);
+  const [maxUsu, setMaxUsu] = useState(PLANO_LIMITES.basico.max_usuarios);
   const [salvando, setSalvando] = useState(false);
+
+  function escolherPlano(p: string) {
+    setPlano(p);
+    setMaxEmp(PLANO_LIMITES[p].max_empresas);
+    setMaxUsu(PLANO_LIMITES[p].max_usuarios);
+  }
 
   async function salvar() {
     setSalvando(true);
     try {
       const { data, error } = await supabase.from("clientes").insert({
-        nome, email_dono: email, plano, max_empresas: maxEmp, max_usuarios: maxUsu,
+        nome, email_dono: email, plano,
+        max_empresas: maxEmp, max_usuarios: maxUsu,
+        modulos_liberados: PLANO_MODULOS[plano],
       }).select().single();
       if (error) throw error;
       await seedPermissoesCliente(data.id);
       toast.success("Cliente criado com permissões padrão.");
       onCreated(data.id);
-      setNome(""); setEmail(""); setPlano("basico"); setMaxEmp(3); setMaxUsu(5);
+      setNome(""); setEmail(""); escolherPlano("basico");
     } catch (e: any) { toast.error(e.message); }
     finally { setSalvando(false); }
   }
@@ -276,12 +284,20 @@ function NovoClienteDrawer({ open, onOpenChange, onCreated }: { open: boolean; o
         <Field label="Nome"><input value={nome} onChange={e => setNome(e.target.value)} className="input"/></Field>
         <Field label="Email do dono"><input type="email" value={email} onChange={e => setEmail(e.target.value)} className="input"/></Field>
         <Field label="Plano">
-          <select value={plano} onChange={e => setPlano(e.target.value)} className="input">
+          <select value={plano} onChange={e => escolherPlano(e.target.value)} className="input">
             <option value="basico">Básico — R$ 197</option>
             <option value="profissional">Profissional — R$ 397</option>
             <option value="enterprise">Enterprise — R$ 797</option>
           </select>
         </Field>
+        <div className="rounded-md border border-border bg-background/50 p-3 text-xs space-y-2">
+          <div className="text-muted-foreground">{PLANO_DESC[plano]}</div>
+          <div className="flex flex-wrap gap-1">
+            {PLANO_MODULOS[plano].map(m => (
+              <span key={m} className="text-[10px] px-1.5 py-0.5 rounded bg-muted border border-border capitalize">{m}</span>
+            ))}
+          </div>
+        </div>
         <div className="grid grid-cols-2 gap-2">
           <Field label="Máx empresas"><input type="number" value={maxEmp} onChange={e => setMaxEmp(+e.target.value)} className="input"/></Field>
           <Field label="Máx usuários"><input type="number" value={maxUsu} onChange={e => setMaxUsu(+e.target.value)} className="input"/></Field>
