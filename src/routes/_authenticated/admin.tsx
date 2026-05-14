@@ -14,6 +14,21 @@ export const Route = createFileRoute("/_authenticated/admin")({
 });
 
 const PLANO_PRICE: Record<string, number> = { basico: 197, profissional: 397, enterprise: 797 };
+const PLANO_MODULOS: Record<string, string[]> = {
+  basico:        ["pipeline","agenda"],
+  profissional:  ["pipeline","agenda","reunioes","tarefas","contratos"],
+  enterprise:    ["pipeline","agenda","reunioes","tarefas","contratos","financeiro","equipe"],
+};
+const PLANO_LIMITES: Record<string, { max_empresas: number; max_usuarios: number }> = {
+  basico:       { max_empresas: 1,   max_usuarios: 3 },
+  profissional: { max_empresas: 3,   max_usuarios: 8 },
+  enterprise:   { max_empresas: 999, max_usuarios: 999 },
+};
+const PLANO_DESC: Record<string, string> = {
+  basico: "Para quem está começando. Gerencie seus leads e compromissos.",
+  profissional: "Para equipes em crescimento. Controle completo do ciclo de vendas.",
+  enterprise: "Sem limites. Visibilidade financeira e gestão completa de equipe.",
+};
 const PLANO_BADGE: Record<string, string> = {
   basico: "bg-muted text-muted-foreground border-border",
   profissional: "bg-blue-500/15 text-blue-400 border-blue-500/30",
@@ -181,6 +196,7 @@ function ClientesSection() {
               <th className="text-left p-3 font-medium">Cliente</th>
               <th className="text-left p-3 font-medium">Email do dono</th>
               <th className="text-left p-3 font-medium">Plano</th>
+              <th className="text-left p-3 font-medium">Módulos</th>
               <th className="text-left p-3 font-medium">Empresas</th>
               <th className="text-left p-3 font-medium">Usuários</th>
               <th className="text-left p-3 font-medium">Status</th>
@@ -188,7 +204,7 @@ function ClientesSection() {
           </thead>
           <tbody>
             {(clientes ?? []).length === 0 && (
-              <tr><td colSpan={6} className="p-6 text-center text-muted-foreground text-sm">Nenhum cliente cadastrado.</td></tr>
+              <tr><td colSpan={7} className="p-6 text-center text-muted-foreground text-sm">Nenhum cliente cadastrado.</td></tr>
             )}
             {clientes?.map(c => (
               <tr key={c.id} onClick={() => setSelecionado(c.id)}
@@ -196,6 +212,13 @@ function ClientesSection() {
                 <td className="p-3 font-medium">{c.nome}</td>
                 <td className="p-3 text-muted-foreground">{c.email_dono}</td>
                 <td className="p-3"><span className={`text-xs px-2 py-0.5 rounded border capitalize ${PLANO_BADGE[c.plano]}`}>{c.plano}</span></td>
+                <td className="p-3">
+                  <div className="flex flex-wrap gap-1 max-w-[260px]">
+                    {((c as any).modulos_liberados ?? []).map((m: string) => (
+                      <span key={m} className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground border border-border capitalize">{m}</span>
+                    ))}
+                  </div>
+                </td>
                 <td className="p-3 text-xs text-muted-foreground">{counts?.empCount.get(c.id) ?? 0}/{c.max_empresas}</td>
                 <td className="p-3 text-xs text-muted-foreground">{counts?.memCount.get(c.id) ?? 0}/{c.max_usuarios}</td>
                 <td className="p-3"><span className={`text-xs px-2 py-0.5 rounded border capitalize ${STATUS_BADGE[c.status]}`}>{c.status}</span></td>
