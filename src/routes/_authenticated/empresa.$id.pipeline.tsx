@@ -7,6 +7,7 @@ import { Plus, ChevronRight } from "lucide-react";
 import { fmtBRL } from "@/lib/format";
 import { toast } from "sonner";
 import { Drawer } from "@/components/nexus/Drawer";
+import { notifyEmpresa } from "@/lib/notifications";
 
 const ESTAGIOS = [
   { id: "lead", label: "Lead" },
@@ -48,8 +49,22 @@ function Pipeline() {
     mutationFn: async ({ id, estagio }: { id: string; estagio: string }) => {
       const { error } = await supabase.from("pipeline").update({ estagio }).eq("id", id);
       if (error) throw error;
+      return { id, estagio };
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["pipeline", empresa_id] }),
+    onSuccess: async (res) => {
+      qc.invalidateQueries({ queryKey: ["pipeline", empresa_id] });
+      if (res?.estagio === "ganho") {
+        const lead = leads?.find(l => l.id === res.id);
+        const { data: { user } } = await supabase.auth.getUser();
+        await notifyEmpresa({
+          empresa_id,
+          tipo: "lead_ganho",
+          titulo: `Lead convertido: ${lead?.nome_lead ?? ""}`,
+          link_rota: `/empresa/${empresa_id}/pipeline`,
+          excluir_user_id: user?.id,
+        });
+      }
+    },
   });
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
@@ -58,6 +73,12 @@ function Pipeline() {
     const overId = e.over?.id as string | undefined;
     const activeId = e.active.id as string;
     if (!overId) return;
+    const sourceLead = leads?.find(l => l.id === activeId);
+    if (sourceLead?.estagio === "ganho" && overId !== "ganho") {
+      toast.error("Leads convertidos não podem ser movidos.");
+      return;
+    }
+    if (sourceLead?.estagio === overId) return;
     moveStage.mutate({ id: activeId, estagio: overId });
   }
 
