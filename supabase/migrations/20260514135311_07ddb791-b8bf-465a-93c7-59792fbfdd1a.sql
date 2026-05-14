@@ -1,0 +1,1 @@
+TRUNCATE TABLE public.notificacoes, public.financeiro, public.agenda, public.tarefas, public.reunioes, public.contratos, public.pipeline, public.membros, public.empresas RESTART IDENTITY CASCADE;
