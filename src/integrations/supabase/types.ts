@@ -100,6 +100,45 @@ export type Database = {
           },
         ]
       }
+      clientes: {
+        Row: {
+          created_at: string | null
+          email_dono: string
+          id: string
+          max_empresas: number
+          max_usuarios: number
+          nome: string
+          observacoes: string | null
+          plano: string
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email_dono: string
+          id?: string
+          max_empresas?: number
+          max_usuarios?: number
+          nome: string
+          observacoes?: string | null
+          plano?: string
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email_dono?: string
+          id?: string
+          max_empresas?: number
+          max_usuarios?: number
+          nome?: string
+          observacoes?: string | null
+          plano?: string
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       contratos: {
         Row: {
           arquivo_url: string | null
@@ -181,6 +220,7 @@ export type Database = {
       }
       empresas: {
         Row: {
+          cliente_id: string | null
           cor_identidade: string
           created_at: string | null
           descricao: string | null
@@ -193,6 +233,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          cliente_id?: string | null
           cor_identidade?: string
           created_at?: string | null
           descricao?: string | null
@@ -205,6 +246,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          cliente_id?: string | null
           cor_identidade?: string
           created_at?: string | null
           descricao?: string | null
@@ -216,7 +258,15 @@ export type Database = {
           updated_at?: string | null
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "empresas_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       financeiro: {
         Row: {
@@ -281,6 +331,7 @@ export type Database = {
       membros: {
         Row: {
           ativo: boolean | null
+          cliente_id: string | null
           created_at: string | null
           email: string | null
           empresa_id: string
@@ -292,6 +343,7 @@ export type Database = {
         }
         Insert: {
           ativo?: boolean | null
+          cliente_id?: string | null
           created_at?: string | null
           email?: string | null
           empresa_id: string
@@ -303,6 +355,7 @@ export type Database = {
         }
         Update: {
           ativo?: boolean | null
+          cliente_id?: string | null
           created_at?: string | null
           email?: string | null
           empresa_id?: string
@@ -313,6 +366,13 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "membros_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "membros_empresa_id_fkey"
             columns: ["empresa_id"]
@@ -362,6 +422,63 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "notificacoes_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      permissoes: {
+        Row: {
+          cliente_id: string
+          created_at: string | null
+          empresa_id: string | null
+          id: string
+          modulo: Database["public"]["Enums"]["modulo"]
+          papel: Database["public"]["Enums"]["empresa_papel"]
+          pode_criar: boolean
+          pode_editar: boolean
+          pode_excluir: boolean
+          pode_ver: boolean
+          updated_at: string | null
+        }
+        Insert: {
+          cliente_id: string
+          created_at?: string | null
+          empresa_id?: string | null
+          id?: string
+          modulo: Database["public"]["Enums"]["modulo"]
+          papel: Database["public"]["Enums"]["empresa_papel"]
+          pode_criar?: boolean
+          pode_editar?: boolean
+          pode_excluir?: boolean
+          pode_ver?: boolean
+          updated_at?: string | null
+        }
+        Update: {
+          cliente_id?: string
+          created_at?: string | null
+          empresa_id?: string | null
+          id?: string
+          modulo?: Database["public"]["Enums"]["modulo"]
+          papel?: Database["public"]["Enums"]["empresa_papel"]
+          pode_criar?: boolean
+          pode_editar?: boolean
+          pode_excluir?: boolean
+          pode_ver?: boolean
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "permissoes_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "permissoes_empresa_id_fkey"
             columns: ["empresa_id"]
             isOneToOne: false
             referencedRelation: "empresas"
@@ -649,9 +766,32 @@ export type Database = {
         }
         Returns: boolean
       }
+      pode_acessar_modulo: {
+        Args: {
+          _acao: string
+          _empresa_id: string
+          _modulo: Database["public"]["Enums"]["modulo"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "admin" | "user"
+      empresa_papel:
+        | "dono"
+        | "gerente"
+        | "membro"
+        | "atendente"
+        | "visualizador"
+      modulo:
+        | "pipeline"
+        | "contratos"
+        | "reunioes"
+        | "tarefas"
+        | "agenda"
+        | "financeiro"
+        | "equipe"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -780,6 +920,16 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      empresa_papel: ["dono", "gerente", "membro", "atendente", "visualizador"],
+      modulo: [
+        "pipeline",
+        "contratos",
+        "reunioes",
+        "tarefas",
+        "agenda",
+        "financeiro",
+        "equipe",
+      ],
     },
   },
 } as const
