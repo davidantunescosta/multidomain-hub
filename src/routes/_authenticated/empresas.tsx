@@ -11,7 +11,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 
-const search = z.object({ new: z.string().optional() });
+const search = z.object({ new: z.union([z.string(), z.number()]).optional() });
 
 export const Route = createFileRoute("/_authenticated/empresas")({
   validateSearch: search,
@@ -23,7 +23,7 @@ function EmpresasPage() {
   const sp = useSearch({ from: "/_authenticated/empresas" });
   const [wizard, setWizard] = useState(false);
 
-  useEffect(() => { if (sp.new === "1") setWizard(true); }, [sp.new]);
+  useEffect(() => { if (String(sp.new ?? "") === "1") setWizard(true); }, [sp.new]);
 
   const { data, isLoading } = useQuery({
     queryKey: ["empresas"],
