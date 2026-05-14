@@ -1,4 +1,4 @@
-import { createFileRoute, useParams } from "@tanstack/react-router";
+import { createFileRoute, useParams, useNavigate } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
@@ -93,6 +93,7 @@ const inp = "w-full h-9 px-3 rounded-md bg-background border border-border text-
 
 function ContratoDrawer({ empresa_id, contrato, onClose }: any) {
   const qc = useQueryClient();
+  const nav = useNavigate();
   const [f, setF] = useState({
     nome_cliente: contrato?.nome_cliente ?? "", descricao: contrato?.descricao ?? "",
     valor_total: contrato?.valor_total ?? "", valor_recorrente: contrato?.valor_recorrente ?? "",
@@ -112,12 +113,33 @@ function ContratoDrawer({ empresa_id, contrato, onClose }: any) {
       if (contrato) {
         const { error } = await supabase.from("contratos").update(payload).eq("id", contrato.id);
         if (error) throw error;
+        return { id: contrato.id };
       } else {
-        const { error } = await supabase.from("contratos").insert(payload);
+        const { data, error } = await supabase.from("contratos").insert(payload).select().single();
         if (error) throw error;
+        return { id: data.id };
       }
     },
-    onSuccess: () => { qc.invalidateQueries({queryKey:["contratos",empresa_id]}); toast.success("Salvo."); onClose(); },
+    onSuccess: (res) => {
+      qc.invalidateQueries({queryKey:["contratos",empresa_id]});
+      const ehAtivo = f.status === "ativo";
+      const recorrente = Number(f.valor_recorrente || 0) > 0;
+      if (ehAtivo && recorrente && !contrato) {
+        toast.success("Contrato ativo criado.", {
+          action: {
+            label: "Criar parcela no financeiro",
+            onClick: () => nav({
+              to: "/empresa/$id/financeiro",
+              params: { id: empresa_id },
+              search: { contrato_id: res?.id, valor: f.valor_recorrente, descricao: `Parcela 1 — ${f.nome_cliente}` } as any,
+            }),
+          },
+        });
+      } else {
+        toast.success("Salvo.");
+      }
+      onClose();
+    },
     onError: (e:any) => toast.error(e.message),
   });
 
