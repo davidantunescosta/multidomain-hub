@@ -351,18 +351,24 @@ function ClienteDrawer({ clienteId, onClose }: { clienteId: string | null; onClo
 
   const salvar = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.from("clientes").update({
+      const planoMudou = cliente?.plano !== formCliente.plano;
+      const payload: any = {
         nome: formCliente.nome, email_dono: formCliente.email_dono,
         plano: formCliente.plano, max_empresas: formCliente.max_empresas,
         max_usuarios: formCliente.max_usuarios, status: formCliente.status,
         observacoes: formCliente.observacoes,
-      }).eq("id", clienteId!);
+      };
+      if (planoMudou && PLANO_MODULOS[formCliente.plano]) {
+        payload.modulos_liberados = PLANO_MODULOS[formCliente.plano];
+      }
+      const { error } = await supabase.from("clientes").update(payload).eq("id", clienteId!);
       if (error) throw error;
     },
     onSuccess: () => {
       toast.success("Contrato atualizado.");
       qc.invalidateQueries({ queryKey: ["admin-clientes"] });
       qc.invalidateQueries({ queryKey: ["cliente", clienteId] });
+      qc.invalidateQueries({ queryKey: ["permissao"] });
       setEdit(null);
     },
     onError: (e: any) => toast.error(e.message),
