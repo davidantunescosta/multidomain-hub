@@ -86,7 +86,7 @@ function AcessoPage() {
       if (!clienteId) throw new Error("Cliente não vinculado");
       const col = args.acao === "ver" ? "pode_ver" : args.acao === "criar" ? "pode_criar" : args.acao === "editar" ? "pode_editar" : "pode_excluir";
       if (args.existeEspecifica && args.existeId) {
-        const { error } = await supabase.from("permissoes").update({ [col]: args.valor }).eq("id", args.existeId);
+        const { error } = await supabase.from("permissoes").update({ [col]: args.valor } as any).eq("id", args.existeId);
         if (error) throw error;
       } else {
         const heredada = permissoes?.find(p => p.empresa_id === null && p.papel === args.papel && p.modulo === args.modulo);
@@ -101,7 +101,7 @@ function AcessoPage() {
           pode_editar: base.pode_editar,
           pode_excluir: base.pode_excluir,
           [col]: args.valor,
-        });
+        } as any);
         if (error) throw error;
       }
     },
