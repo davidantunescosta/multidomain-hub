@@ -1,5 +1,65 @@
 import { supabase } from "@/integrations/supabase/client";
 
+type Papel = "gerente" | "membro" | "atendente" | "visualizador";
+type Modulo = "pipeline" | "contratos" | "reunioes" | "tarefas" | "agenda" | "financeiro" | "equipe";
+type Regra = { ver: boolean; criar: boolean; editar: boolean; excluir: boolean };
+
+const MODULOS: Modulo[] = ["pipeline","contratos","reunioes","tarefas","agenda","financeiro","equipe"];
+
+const DEFAULT_PERMISSOES: Record<Papel, Record<Modulo, Regra>> = {
+  gerente: {
+    pipeline:   { ver: true,  criar: true,  editar: true,  excluir: false },
+    contratos:  { ver: true,  criar: false, editar: false, excluir: false },
+    reunioes:   { ver: true,  criar: true,  editar: true,  excluir: false },
+    tarefas:    { ver: true,  criar: true,  editar: true,  excluir: false },
+    agenda:     { ver: true,  criar: true,  editar: true,  excluir: false },
+    financeiro: { ver: false, criar: false, editar: false, excluir: false },
+    equipe:     { ver: false, criar: false, editar: false, excluir: false },
+  },
+  membro: {
+    pipeline:   { ver: true,  criar: true,  editar: true,  excluir: false },
+    contratos:  { ver: false, criar: false, editar: false, excluir: false },
+    reunioes:   { ver: true,  criar: true,  editar: true,  excluir: false },
+    tarefas:    { ver: true,  criar: true,  editar: true,  excluir: false },
+    agenda:     { ver: true,  criar: true,  editar: true,  excluir: false },
+    financeiro: { ver: false, criar: false, editar: false, excluir: false },
+    equipe:     { ver: true,  criar: false, editar: false, excluir: false },
+  },
+  atendente: {
+    pipeline:   { ver: true,  criar: true,  editar: false, excluir: false },
+    contratos:  { ver: false, criar: false, editar: false, excluir: false },
+    reunioes:   { ver: false, criar: false, editar: false, excluir: false },
+    tarefas:    { ver: false, criar: false, editar: false, excluir: false },
+    agenda:     { ver: true,  criar: true,  editar: true,  excluir: false },
+    financeiro: { ver: false, criar: false, editar: false, excluir: false },
+    equipe:     { ver: false, criar: false, editar: false, excluir: false },
+  },
+  visualizador: Object.fromEntries(
+    MODULOS.map(m => [m, { ver: true, criar: false, editar: false, excluir: false } as Regra])
+  ) as Record<Modulo, Regra>,
+};
+
+export async function seedPermissoesCliente(clienteId: string): Promise<void> {
+  const rows: any[] = [];
+  (Object.keys(DEFAULT_PERMISSOES) as Papel[]).forEach(papel => {
+    MODULOS.forEach(modulo => {
+      const r = DEFAULT_PERMISSOES[papel][modulo];
+      rows.push({
+        cliente_id: clienteId,
+        empresa_id: null,
+        papel,
+        modulo,
+        pode_ver: r.ver,
+        pode_criar: r.criar,
+        pode_editar: r.editar,
+        pode_excluir: r.excluir,
+      });
+    });
+  });
+  const { error } = await supabase.from("permissoes").insert(rows);
+  if (error) throw error;
+}
+
 export async function seedDemoData(): Promise<{ success: boolean; message: string }> {
   try {
     const { data: userData, error: userErr } = await supabase.auth.getUser();
