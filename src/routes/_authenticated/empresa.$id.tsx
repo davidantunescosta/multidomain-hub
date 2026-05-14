@@ -20,6 +20,8 @@ const TABS = [
   { to: "configuracoes", label: "Configurações" },
 ];
 
+const DONO_TABS = [{ to: "acesso", label: "Gestão de Acesso" }];
+
 function WorkspaceLayout() {
   const { id } = useParams({ from: "/_authenticated/empresa/$id" });
   const path = useRouterState({ select: r => r.location.pathname });
