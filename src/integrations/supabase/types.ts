@@ -107,6 +107,7 @@ export type Database = {
           id: string
           max_empresas: number
           max_usuarios: number
+          modulos_liberados: string[]
           nome: string
           observacoes: string | null
           plano: string
@@ -119,6 +120,7 @@ export type Database = {
           id?: string
           max_empresas?: number
           max_usuarios?: number
+          modulos_liberados?: string[]
           nome: string
           observacoes?: string | null
           plano?: string
@@ -131,6 +133,7 @@ export type Database = {
           id?: string
           max_empresas?: number
           max_usuarios?: number
+          modulos_liberados?: string[]
           nome?: string
           observacoes?: string | null
           plano?: string
