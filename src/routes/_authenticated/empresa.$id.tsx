@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ArrowLeft } from "lucide-react";
 import { useCommandPalette } from "@/components/layout/palette-store";
 import { NotificationsBell } from "@/components/layout/NotificationsBell";
+import { useAuth } from "@/lib/auth";
 
 export const Route = createFileRoute("/_authenticated/empresa/$id")({
   component: WorkspaceLayout,
@@ -26,6 +27,7 @@ function WorkspaceLayout() {
   const { id } = useParams({ from: "/_authenticated/empresa/$id" });
   const path = useRouterState({ select: r => r.location.pathname });
   const { setOpen } = useCommandPalette();
+  const { user } = useAuth();
 
   const { data: empresa } = useQuery({
     queryKey: ["empresa", id],
@@ -35,7 +37,21 @@ function WorkspaceLayout() {
     },
   });
 
+  const { data: podeGerirAcesso } = useQuery({
+    queryKey: ["pode-gerir-acesso", user?.id, id],
+    queryFn: async () => {
+      const [{ data: roleRow }, { data: membroRow }] = await Promise.all([
+        supabase.from("user_roles").select("role").eq("user_id", user!.id).eq("role", "admin").maybeSingle(),
+        supabase.from("membros").select("papel").eq("user_id", user!.id).eq("empresa_id", id).eq("ativo", true).maybeSingle(),
+      ]);
+      return !!roleRow || membroRow?.papel === "dono";
+    },
+    enabled: !!user && !!id,
+  });
+
   if (!empresa) return <div className="p-6 text-sm text-muted-foreground">Carregando…</div>;
+
+  const allTabs = podeGerirAcesso ? [...TABS, ...DONO_TABS] : TABS;
 
   return (
     <>
@@ -51,7 +67,7 @@ function WorkspaceLayout() {
           <NotificationsBell/>
         </div>
         <nav className="px-4 flex gap-1 overflow-x-auto">
-          {TABS.map(t => {
+          {allTabs.map(t => {
             const full = `/empresa/${id}/${t.to}`;
             const active = path.includes(full);
             return (
