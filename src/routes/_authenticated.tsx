@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from "@/lib/auth";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { CommandPalette } from "@/components/layout/CommandPalette";
 import { useEffect } from "react";
+import { generateNotifications } from "@/lib/notifications";
 
 export const Route = createFileRoute("/_authenticated")({
   component: () => (
@@ -19,6 +20,15 @@ function Guarded() {
   useEffect(() => {
     if (!loading && !user) nav({ to: "/login", replace: true });
   }, [loading, user, nav]);
+
+  useEffect(() => {
+    if (!user) return;
+    generateNotifications(user.id).catch(() => {});
+    const interval = setInterval(() => {
+      generateNotifications(user.id).catch(() => {});
+    }, 10 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [user?.id]);
 
   if (loading || !user) {
     return <div className="min-h-screen grid place-items-center text-muted-foreground text-sm">Carregando…</div>;

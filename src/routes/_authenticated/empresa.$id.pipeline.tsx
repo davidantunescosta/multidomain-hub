@@ -7,6 +7,7 @@ import { Plus, ChevronRight } from "lucide-react";
 import { fmtBRL } from "@/lib/format";
 import { toast } from "sonner";
 import { Drawer } from "@/components/nexus/Drawer";
+import { notifyEmpresa } from "@/lib/notifications";
 
 const ESTAGIOS = [
   { id: "lead", label: "Lead" },
@@ -48,8 +49,22 @@ function Pipeline() {
     mutationFn: async ({ id, estagio }: { id: string; estagio: string }) => {
       const { error } = await supabase.from("pipeline").update({ estagio }).eq("id", id);
       if (error) throw error;
+      return { id, estagio };
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["pipeline", empresa_id] }),
+    onSuccess: async (res) => {
+      qc.invalidateQueries({ queryKey: ["pipeline", empresa_id] });
+      if (res?.estagio === "ganho") {
+        const lead = leads?.find(l => l.id === res.id);
+        const { data: { user } } = await supabase.auth.getUser();
+        await notifyEmpresa({
+          empresa_id,
+          tipo: "lead_ganho",
+          titulo: `Lead convertido: ${lead?.nome_lead ?? ""}`,
+          link_rota: `/empresa/${empresa_id}/pipeline`,
+          excluir_user_id: user?.id,
+        });
+      }
+    },
   });
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }));
@@ -58,6 +73,12 @@ function Pipeline() {
     const overId = e.over?.id as string | undefined;
     const activeId = e.active.id as string;
     if (!overId) return;
+    const sourceLead = leads?.find(l => l.id === activeId);
+    if (sourceLead?.estagio === "ganho" && overId !== "ganho") {
+      toast.error("Leads convertidos não podem ser movidos.");
+      return;
+    }
+    if (sourceLead?.estagio === overId) return;
     moveStage.mutate({ id: activeId, estagio: overId });
   }
 
@@ -109,6 +130,12 @@ function LeadCard({ lead, onClick }: any) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: lead.id });
   const style = transform ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` } : undefined;
   const dias = Math.floor((Date.now() - new Date(lead.updated_at).getTime()) / 86400000);
+  const diasCls = dias >= 14
+    ? "text-destructive font-semibold"
+    : dias >= 7
+    ? "text-amber-400"
+    : "text-muted-foreground";
+  const diasLabel = dias >= 14 ? `⚠ ${dias}d` : `${dias}d`;
   return (
     <div ref={setNodeRef} style={style} {...attributes} {...listeners}
       className={`bg-background border border-border rounded p-2.5 cursor-grab active:cursor-grabbing ${isDragging?"opacity-50":""}`}
@@ -117,7 +144,7 @@ function LeadCard({ lead, onClick }: any) {
       {lead.empresa_lead && <div className="text-[11px] text-muted-foreground truncate">{lead.empresa_lead}</div>}
       <div className="flex items-center justify-between mt-2">
         <span className="font-mono text-[11px]">{fmtBRL(lead.valor_estimado)}</span>
-        <span className="text-[10px] text-muted-foreground">há {dias}d</span>
+        <span className={`text-[10px] ${diasCls}`}>{diasLabel}</span>
       </div>
       {lead.probabilidade != null && (
         <div className="mt-2 h-1 bg-border rounded overflow-hidden">
@@ -132,6 +159,7 @@ const inp = "w-full h-9 px-3 rounded-md bg-background border border-border text-
 
 function LeadDrawer({ empresa_id, lead, estagio, onClose }: { empresa_id: string; lead?: any; estagio?: string; onClose: () => void }) {
   const qc = useQueryClient();
+  const [showConvert, setShowConvert] = useState(false);
   const [f, setF] = useState({
     nome_lead: lead?.nome_lead ?? "", empresa_lead: lead?.empresa_lead ?? "",
     contato_email: lead?.contato_email ?? "", contato_telefone: lead?.contato_telefone ?? "",
@@ -176,20 +204,9 @@ function LeadDrawer({ empresa_id, lead, estagio, onClose }: { empresa_id: string
     onError: (e: any) => toast.error(e.message),
   });
 
-  const convert = useMutation({
-    mutationFn: async () => {
-      const { error } = await supabase.from("contratos").insert({
-        empresa_id, pipeline_id: lead.id, nome_cliente: lead.nome_lead,
-        valor_total: lead.valor_estimado, status: "em_negociacao",
-      });
-      if (error) throw error;
-    },
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ["contratos", empresa_id] }); toast.success("Convertido em contrato."); onClose(); },
-  });
-
   return (
     <Drawer open onOpenChange={(v) => !v && onClose()} title={lead ? "Editar lead" : "Novo lead"}>
-      <div className="space-y-3 py-4">
+      {!showConvert && <div className="space-y-3 py-4">
         <Field label="Nome do lead *"><input value={f.nome_lead} onChange={e=>setF({...f,nome_lead:e.target.value})} className={inp}/></Field>
         <div className="grid grid-cols-2 gap-3">
           <Field label="Empresa"><input value={f.empresa_lead} onChange={e=>setF({...f,empresa_lead:e.target.value})} className={inp}/></Field>
@@ -218,14 +235,146 @@ function LeadDrawer({ empresa_id, lead, estagio, onClose }: { empresa_id: string
           <Field label="Fechamento previsto"><input type="date" value={f.data_fechamento} onChange={e=>setF({...f,data_fechamento:e.target.value})} className={inp}/></Field>
         </div>
         <Field label="Observações"><textarea value={f.observacoes} onChange={e=>setF({...f,observacoes:e.target.value})} className={inp+" min-h-[80px]"}/></Field>
+      </div>}
+      {showConvert && lead && <ConvertForm empresa_id={empresa_id} lead={lead} onCancel={() => setShowConvert(false)} onDone={onClose}/>}
+      {!showConvert && (
+        <div className="border-t border-border pt-3 flex gap-2">
+          {lead && lead.estagio !== "ganho" && lead.estagio !== "perdido" && (
+            <button onClick={() => setShowConvert(true)} className="h-9 px-3 rounded-md border border-border text-xs hover:bg-accent">
+              Converter em contrato
+            </button>
+          )}
+          <button onClick={() => save.mutate()} disabled={!f.nome_lead || save.isPending} className="ml-auto h-9 px-4 rounded-md bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 disabled:opacity-50">
+            {save.isPending ? "Salvando…" : "Salvar"}
+          </button>
+        </div>
+      )}
+    </Drawer>
+  );
+}
+
+function ConvertForm({ empresa_id, lead, onCancel, onDone }: { empresa_id: string; lead: any; onCancel: () => void; onDone: () => void }) {
+  const qc = useQueryClient();
+  const hoje = new Date().toISOString().slice(0, 10);
+  const [c, setC] = useState({
+    nome_cliente: lead.nome_lead ?? "",
+    descricao: [lead.empresa_lead, lead.observacoes].filter(Boolean).join(" — "),
+    valor_total: lead.valor_estimado ?? "",
+    valor_recorrente: "",
+    periodicidade: "mensal",
+    data_inicio: hoje,
+    data_fim: "",
+    observacoes: lead.observacoes ?? "",
+  });
+  const [criarFin, setCriarFin] = useState(true);
+
+  function venc30(dataInicio: string) {
+    const d = new Date(dataInicio); d.setDate(d.getDate() + 30);
+    return d.toISOString().slice(0, 10);
+  }
+
+  const valorParcela = c.valor_recorrente ? Number(c.valor_recorrente) : Number(c.valor_total || 0);
+  const dataVencFin = c.periodicidade === "mensal" ? venc30(c.data_inicio) : c.data_inicio;
+
+  const convert = useMutation({
+    mutationFn: async () => {
+      if (!c.nome_cliente) throw new Error("Nome do cliente é obrigatório.");
+      if (!c.valor_total) throw new Error("Valor total é obrigatório.");
+      if (!c.periodicidade) throw new Error("Periodicidade é obrigatória.");
+      if (!c.data_inicio) throw new Error("Data de início é obrigatória.");
+
+      const { data: contrato, error: errC } = await supabase.from("contratos").insert({
+        empresa_id, pipeline_id: lead.id,
+        nome_cliente: c.nome_cliente,
+        descricao: c.descricao || null,
+        valor_total: Number(c.valor_total),
+        valor_recorrente: c.valor_recorrente ? Number(c.valor_recorrente) : null,
+        periodicidade: c.periodicidade,
+        data_inicio: c.data_inicio,
+        data_fim: c.data_fim || null,
+        observacoes: c.observacoes || null,
+        status: "ativo",
+      }).select().single();
+      if (errC) throw errC;
+
+      const { error: errP } = await supabase.from("pipeline")
+        .update({ estagio: "ganho", updated_at: new Date().toISOString() }).eq("id", lead.id);
+      if (errP) throw errP;
+
+      if (criarFin) {
+        const { error: errF } = await supabase.from("financeiro").insert({
+          empresa_id, contrato_id: contrato.id,
+          tipo: "receita", categoria: "mensalidade",
+          descricao: `Parcela 1 — ${c.nome_cliente}`,
+          valor: valorParcela,
+          data_vencimento: dataVencFin,
+          status_pagamento: "pendente",
+        });
+        if (errF) throw errF;
+      }
+
+      const { data: { user } } = await supabase.auth.getUser();
+      await notifyEmpresa({
+        empresa_id, tipo: "contrato_criado",
+        titulo: `Novo contrato criado: ${c.nome_cliente}`,
+        link_rota: `/empresa/${empresa_id}/contratos`,
+        excluir_user_id: user?.id,
+      });
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["pipeline", empresa_id] });
+      qc.invalidateQueries({ queryKey: ["contratos", empresa_id] });
+      qc.invalidateQueries({ queryKey: ["financeiro", empresa_id] });
+      toast.success("Lead convertido! Contrato ativo criado.");
+      onDone();
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  return (
+    <>
+      <div className="space-y-3 py-4">
+        <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Converter lead em contrato</div>
+        <Field label="Nome do cliente *"><input value={c.nome_cliente} onChange={e=>setC({...c,nome_cliente:e.target.value})} className={inp}/></Field>
+        <Field label="Descrição do contrato"><textarea value={c.descricao} onChange={e=>setC({...c,descricao:e.target.value})} className={inp+" min-h-[60px]"}/></Field>
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Valor total (R$) *"><input type="number" value={c.valor_total} onChange={e=>setC({...c,valor_total:e.target.value})} className={inp}/></Field>
+          <Field label="Valor recorrente (R$)"><input type="number" value={c.valor_recorrente} onChange={e=>setC({...c,valor_recorrente:e.target.value})} className={inp}/></Field>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Periodicidade *"><select value={c.periodicidade} onChange={e=>setC({...c,periodicidade:e.target.value})} className={inp}>
+            {["mensal","trimestral","semestral","anual","avulso"].map(p=><option key={p}>{p}</option>)}
+          </select></Field>
+          <Field label="Data de início *"><input type="date" value={c.data_inicio} onChange={e=>setC({...c,data_inicio:e.target.value})} className={inp}/></Field>
+        </div>
+        <Field label="Data de término"><input type="date" value={c.data_fim} onChange={e=>setC({...c,data_fim:e.target.value})} className={inp}/></Field>
+        <Field label="Observações"><textarea value={c.observacoes} onChange={e=>setC({...c,observacoes:e.target.value})} className={inp+" min-h-[60px]"}/></Field>
+
+        <div className="border-t border-border pt-3 space-y-3">
+          <label className="flex items-center gap-2 text-xs">
+            <input type="checkbox" checked={criarFin} onChange={e=>setCriarFin(e.target.checked)}/>
+            <span className="font-medium">Criar primeira parcela no financeiro</span>
+          </label>
+          {criarFin && (
+            <div className="rounded-md border border-border bg-background/50 p-3 text-xs space-y-1.5 text-muted-foreground">
+              <div>Tipo: <span className="text-foreground">receita</span></div>
+              <div>Categoria: <span className="text-foreground">mensalidade</span></div>
+              <div>Descrição: <span className="text-foreground">Parcela 1 — {c.nome_cliente || "—"}</span></div>
+              <div>Valor: <span className="text-foreground font-mono">{fmtBRL(valorParcela)}</span></div>
+              <div>Vencimento: <span className="text-foreground font-mono">{dataVencFin || "—"}</span></div>
+              <div>Status: <span className="text-foreground">pendente</span></div>
+            </div>
+          )}
+        </div>
       </div>
       <div className="border-t border-border pt-3 flex gap-2">
-        {lead && <button onClick={() => convert.mutate()} className="h-9 px-3 rounded-md border border-border text-xs hover:bg-accent">Converter em contrato</button>}
-        <button onClick={() => save.mutate()} disabled={!f.nome_lead || save.isPending} className="ml-auto h-9 px-4 rounded-md bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 disabled:opacity-50">
-          {save.isPending ? "Salvando…" : "Salvar"}
+        <button onClick={onCancel} className="h-9 px-3 rounded-md border border-border text-xs hover:bg-accent">Cancelar</button>
+        <button onClick={() => convert.mutate()} disabled={convert.isPending}
+          className="ml-auto h-9 px-4 rounded-md bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 disabled:opacity-50">
+          {convert.isPending ? "Convertendo…" : "Confirmar e converter →"}
         </button>
       </div>
-    </Drawer>
+    </>
   );
 }
 

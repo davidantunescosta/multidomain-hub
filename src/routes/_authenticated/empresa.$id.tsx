@@ -11,14 +11,14 @@ export const Route = createFileRoute("/_authenticated/empresa/$id")({
 });
 
 const TABS = [
-  { to: "pipeline", label: "Pipeline" },
-  { to: "contratos", label: "Contratos" },
-  { to: "reunioes", label: "Reuniões" },
-  { to: "tarefas", label: "Tarefas" },
-  { to: "agenda", label: "Agenda" },
-  { to: "financeiro", label: "Financeiro" },
-  { to: "equipe", label: "Equipe" },
-  { to: "configuracoes", label: "Configurações" },
+  { to: "pipeline", label: "Pipeline", modulo: "pipeline" },
+  { to: "contratos", label: "Contratos", modulo: "contratos" },
+  { to: "reunioes", label: "Reuniões", modulo: "reunioes" },
+  { to: "tarefas", label: "Tarefas", modulo: "tarefas" },
+  { to: "agenda", label: "Agenda", modulo: "agenda" },
+  { to: "financeiro", label: "Financeiro", modulo: "financeiro" },
+  { to: "equipe", label: "Equipe", modulo: "equipe" },
+  { to: "configuracoes", label: "Configurações", modulo: null },
 ];
 
 const DONO_TABS = [{ to: "acesso", label: "Gestão de Acesso" }];
@@ -49,9 +49,33 @@ function WorkspaceLayout() {
     enabled: !!user && !!id,
   });
 
+  const { data: modulosLiberados } = useQuery({
+    queryKey: ["modulos-liberados-empresa", id, user?.id],
+    queryFn: async () => {
+      // Admin: todos os módulos
+      const { data: roleRow } = await supabase
+        .from("user_roles").select("role").eq("user_id", user!.id).eq("role", "admin").maybeSingle();
+      if (roleRow) return null;
+
+      // Buscar membro p/ pegar cliente_id; se for dono, ver tudo
+      const { data: membro } = await supabase
+        .from("membros").select("papel, cliente_id")
+        .eq("user_id", user!.id).eq("empresa_id", id).eq("ativo", true).maybeSingle();
+      if (!membro || membro.papel === "dono" || !membro.cliente_id) return null;
+
+      const { data: cliente } = await supabase
+        .from("clientes").select("modulos_liberados").eq("id", membro.cliente_id).maybeSingle();
+      return (cliente as any)?.modulos_liberados as string[] | null ?? null;
+    },
+    enabled: !!user && !!id,
+  });
+
   if (!empresa) return <div className="p-6 text-sm text-muted-foreground">Carregando…</div>;
 
-  const allTabs = podeGerirAcesso ? [...TABS, ...DONO_TABS] : TABS;
+  const baseTabs = modulosLiberados
+    ? TABS.filter(t => t.modulo === null || modulosLiberados.includes(t.modulo))
+    : TABS;
+  const allTabs = podeGerirAcesso ? [...baseTabs, ...DONO_TABS] : baseTabs;
 
   return (
     <>
