@@ -64,7 +64,7 @@ export function usePermissao(empresaId: string | undefined, modulo: ModuloPermis
   });
 
   return {
-    pode: acoes ?? { ver: true, criar: true, editar: true, excluir: true },
+    pode: acoes ?? { ver: false, criar: false, editar: false, excluir: false },
     carregando: isLoading,
   };
 }
