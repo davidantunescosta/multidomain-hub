@@ -7,6 +7,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { seedDemoData, seedPermissoesCliente } from "@/lib/seed-demo";
 import { Drawer } from "@/components/nexus/Drawer";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { AcessoNegado } from "@/components/nexus/AcessoNegado";
+import { useAuth } from "@/lib/auth";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({ meta: [{ title: "Administração — NEXUS OS" }] }),
@@ -48,6 +50,22 @@ type Modulo = typeof MODULOS[number];
 type Acao = typeof ACOES[number];
 
 function AdminPage() {
+  const { user } = useAuth();
+  const { data: isAdmin, isLoading: checkingAdmin } = useQuery({
+    queryKey: ["is-admin-gate", user?.id],
+    queryFn: async () => {
+      const { data } = await supabase.from("user_roles").select("role")
+        .eq("user_id", user!.id).eq("role", "admin").maybeSingle();
+      return !!data;
+    },
+    enabled: !!user,
+  });
+  if (checkingAdmin) {
+    return <div className="flex-1 grid place-items-center text-sm text-muted-foreground">Verificando permissões…</div>;
+  }
+  if (!isAdmin) {
+    return <AcessoNegado mensagem="Acesso restrito a administradores." />;
+  }
   return (
     <div className="flex-1 overflow-y-auto">
       <header className="h-12 border-b border-border px-4 flex items-center">
