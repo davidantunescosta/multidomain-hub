@@ -778,6 +778,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      seed_permissoes_padrao: {
+        Args: { p_cliente_id: string; p_modulos: string[] }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "user"
