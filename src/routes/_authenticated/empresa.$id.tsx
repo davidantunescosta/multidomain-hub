@@ -49,33 +49,9 @@ function WorkspaceLayout() {
     enabled: !!user && !!id,
   });
 
-  const { data: modulosLiberados } = useQuery({
-    queryKey: ["modulos-liberados-empresa", id, user?.id],
-    queryFn: async () => {
-      // Admin: todos os módulos
-      const { data: roleRow } = await supabase
-        .from("user_roles").select("role").eq("user_id", user!.id).eq("role", "admin").maybeSingle();
-      if (roleRow) return null;
-
-      // Buscar membro p/ pegar cliente_id; se for dono, ver tudo
-      const { data: membro } = await supabase
-        .from("membros").select("papel, cliente_id")
-        .eq("user_id", user!.id).eq("empresa_id", id).eq("ativo", true).maybeSingle();
-      if (!membro || membro.papel === "dono" || !membro.cliente_id) return null;
-
-      const { data: cliente } = await supabase
-        .from("clientes").select("modulos_liberados").eq("id", membro.cliente_id).maybeSingle();
-      return (cliente as any)?.modulos_liberados as string[] | null ?? null;
-    },
-    enabled: !!user && !!id,
-  });
-
   if (!empresa) return <div className="p-6 text-sm text-muted-foreground">Carregando…</div>;
 
-  const baseTabs = modulosLiberados
-    ? TABS.filter(t => t.modulo === null || modulosLiberados.includes(t.modulo))
-    : TABS;
-  const allTabs = podeGerirAcesso ? [...baseTabs, ...DONO_TABS] : baseTabs;
+  const allTabs = podeGerirAcesso ? [...TABS, ...DONO_TABS] : TABS;
 
   return (
     <>
