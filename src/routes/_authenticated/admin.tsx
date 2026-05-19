@@ -16,20 +16,15 @@ export const Route = createFileRoute("/_authenticated/admin")({
 });
 
 const PLANO_PRICE: Record<string, number> = { basico: 197, profissional: 397, enterprise: 797 };
-const PLANO_MODULOS: Record<string, string[]> = {
-  basico:        ["pipeline","agenda"],
-  profissional:  ["pipeline","agenda","reunioes","tarefas","contratos"],
-  enterprise:    ["pipeline","agenda","reunioes","tarefas","contratos","financeiro","equipe"],
-};
 const PLANO_LIMITES: Record<string, { max_empresas: number; max_usuarios: number }> = {
-  basico:       { max_empresas: 1,   max_usuarios: 3 },
-  profissional: { max_empresas: 3,   max_usuarios: 8 },
+  basico:       { max_empresas: 1,   max_usuarios: 5   },
+  profissional: { max_empresas: 5,   max_usuarios: 15  },
   enterprise:   { max_empresas: 999, max_usuarios: 999 },
 };
 const PLANO_DESC: Record<string, string> = {
-  basico: "Para quem está começando. Gerencie seus leads e compromissos.",
-  profissional: "Para equipes em crescimento. Controle completo do ciclo de vendas.",
-  enterprise: "Sem limites. Visibilidade financeira e gestão completa de equipe.",
+  basico:       "1 empresa · até 5 usuários · todos os módulos",
+  profissional: "até 5 empresas · até 15 usuários · todos os módulos",
+  enterprise:   "empresas e usuários ilimitados · todos os módulos · suporte dedicado",
 };
 const PLANO_BADGE: Record<string, string> = {
   basico: "bg-muted text-muted-foreground border-border",
@@ -214,7 +209,7 @@ function ClientesSection() {
               <th className="text-left p-3 font-medium">Cliente</th>
               <th className="text-left p-3 font-medium">Email do dono</th>
               <th className="text-left p-3 font-medium">Plano</th>
-              <th className="text-left p-3 font-medium">Módulos</th>
+              <th className="text-left p-3 font-medium">Capacidade</th>
               <th className="text-left p-3 font-medium">Empresas</th>
               <th className="text-left p-3 font-medium">Usuários</th>
               <th className="text-left p-3 font-medium">Status</th>
@@ -230,12 +225,9 @@ function ClientesSection() {
                 <td className="p-3 font-medium">{c.nome}</td>
                 <td className="p-3 text-muted-foreground">{c.email_dono}</td>
                 <td className="p-3"><span className={`text-xs px-2 py-0.5 rounded border capitalize ${PLANO_BADGE[c.plano]}`}>{c.plano}</span></td>
-                <td className="p-3">
-                  <div className="flex flex-wrap gap-1 max-w-[260px]">
-                    {((c as any).modulos_liberados ?? []).map((m: string) => (
-                      <span key={m} className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-muted-foreground border border-border capitalize">{m}</span>
-                    ))}
-                  </div>
+                <td className="p-3 text-xs text-muted-foreground">
+                  {c.max_empresas === 999 ? "∞" : c.max_empresas} emp ·{" "}
+                  {c.max_usuarios === 999 ? "∞" : c.max_usuarios} usr
                 </td>
                 <td className="p-3 text-xs text-muted-foreground">{counts?.empCount.get(c.id) ?? 0}/{c.max_empresas}</td>
                 <td className="p-3 text-xs text-muted-foreground">{counts?.memCount.get(c.id) ?? 0}/{c.max_usuarios}</td>
@@ -285,7 +277,6 @@ function NovoClienteDrawer({ open, onOpenChange, onCreated }: { open: boolean; o
       const { data, error } = await supabase.from("clientes").insert({
         nome, email_dono: email, plano,
         max_empresas: maxEmp, max_usuarios: maxUsu,
-        modulos_liberados: PLANO_MODULOS[plano],
       }).select().single();
       if (error) throw error;
       await seedPermissoesCliente(data.id);
@@ -310,10 +301,8 @@ function NovoClienteDrawer({ open, onOpenChange, onCreated }: { open: boolean; o
         </Field>
         <div className="rounded-md border border-border bg-background/50 p-3 text-xs space-y-2">
           <div className="text-muted-foreground">{PLANO_DESC[plano]}</div>
-          <div className="flex flex-wrap gap-1">
-            {PLANO_MODULOS[plano].map(m => (
-              <span key={m} className="text-[10px] px-1.5 py-0.5 rounded bg-muted border border-border capitalize">{m}</span>
-            ))}
+          <div className="text-[11px] text-muted-foreground">
+            Todos os módulos incluídos. Diferença por capacidade de empresas e usuários.
           </div>
         </div>
         <div className="grid grid-cols-2 gap-2">
@@ -376,8 +365,9 @@ function ClienteDrawer({ clienteId, onClose }: { clienteId: string | null; onClo
         max_usuarios: formCliente.max_usuarios, status: formCliente.status,
         observacoes: formCliente.observacoes,
       };
-      if (planoMudou && PLANO_MODULOS[formCliente.plano]) {
-        payload.modulos_liberados = PLANO_MODULOS[formCliente.plano];
+      if (planoMudou && PLANO_LIMITES[formCliente.plano]) {
+        payload.max_empresas = PLANO_LIMITES[formCliente.plano].max_empresas;
+        payload.max_usuarios = PLANO_LIMITES[formCliente.plano].max_usuarios;
       }
       const { error } = await supabase.from("clientes").update(payload).eq("id", clienteId!);
       if (error) throw error;
@@ -474,13 +464,11 @@ function ClienteDrawer({ clienteId, onClose }: { clienteId: string | null; onClo
           </div>
           <div className="rounded-md border border-border bg-background/50 p-3 text-xs space-y-2">
             <div className="text-muted-foreground">{PLANO_DESC[formCliente.plano ?? "basico"]}</div>
-            <div className="flex flex-wrap gap-1">
-              {(((edit && PLANO_MODULOS[formCliente.plano]) ?? (cliente as any)?.modulos_liberados ?? []) as string[]).map(m => (
-                <span key={m} className="text-[10px] px-1.5 py-0.5 rounded bg-muted border border-border capitalize">{m}</span>
-              ))}
+            <div className="text-[11px] text-muted-foreground">
+              Todos os módulos incluídos. Diferença por capacidade de empresas e usuários.
             </div>
             {edit && cliente?.plano !== formCliente.plano && (
-              <div className="text-amber-400">Salvar atualizará os módulos liberados conforme o novo plano.</div>
+              <div className="text-amber-400">Salvar ajustará os limites de empresas e usuários conforme o novo plano.</div>
             )}
           </div>
           <Field label="Observações"><textarea value={formCliente.observacoes ?? ""} onChange={e => setEdit({...formCliente, observacoes: e.target.value})} className="input" rows={3}/></Field>
