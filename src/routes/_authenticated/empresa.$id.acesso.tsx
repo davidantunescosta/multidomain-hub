@@ -20,6 +20,51 @@ type Papel = typeof PAPEIS[number];
 type Modulo = typeof MODULOS[number];
 type Acao = typeof ACOES[number];
 
+const MODULO_LABEL: Record<Modulo, string> = {
+  pipeline: "Pipeline", agenda: "Agenda", reunioes: "Reuniões",
+  tarefas: "Tarefas", contratos: "Contratos",
+  financeiro: "Financeiro", equipe: "Equipe",
+};
+
+const DEFAULT_PERMS: Record<Papel, Partial<Record<Modulo, { ver: boolean; criar: boolean; editar: boolean }>>> = {
+  gerente: {
+    pipeline:   { ver: true,  criar: true,  editar: true  },
+    agenda:     { ver: true,  criar: true,  editar: true  },
+    reunioes:   { ver: true,  criar: true,  editar: true  },
+    tarefas:    { ver: true,  criar: true,  editar: true  },
+    contratos:  { ver: true,  criar: true,  editar: false },
+    financeiro: { ver: false, criar: false, editar: false },
+    equipe:     { ver: true,  criar: false, editar: false },
+  },
+  membro: {
+    pipeline:   { ver: true,  criar: true,  editar: true  },
+    agenda:     { ver: true,  criar: true,  editar: true  },
+    reunioes:   { ver: true,  criar: true,  editar: false },
+    tarefas:    { ver: true,  criar: true,  editar: true  },
+    contratos:  { ver: false, criar: false, editar: false },
+    financeiro: { ver: false, criar: false, editar: false },
+    equipe:     { ver: true,  criar: false, editar: false },
+  },
+  atendente: {
+    pipeline:   { ver: true,  criar: true,  editar: false },
+    agenda:     { ver: true,  criar: true,  editar: true  },
+    reunioes:   { ver: false, criar: false, editar: false },
+    tarefas:    { ver: true,  criar: false, editar: false },
+    contratos:  { ver: false, criar: false, editar: false },
+    financeiro: { ver: false, criar: false, editar: false },
+    equipe:     { ver: false, criar: false, editar: false },
+  },
+  visualizador: {
+    pipeline:   { ver: true,  criar: false, editar: false },
+    agenda:     { ver: true,  criar: false, editar: false },
+    reunioes:   { ver: true,  criar: false, editar: false },
+    tarefas:    { ver: true,  criar: false, editar: false },
+    contratos:  { ver: true,  criar: false, editar: false },
+    financeiro: { ver: true,  criar: false, editar: false },
+    equipe:     { ver: true,  criar: false, editar: false },
+  },
+};
+
 const PAPEL_BADGE: Record<string, string> = {
   dono: "bg-primary/15 text-primary border-primary/30",
   gerente: "bg-violet-500/15 text-violet-400 border-violet-500/30",
@@ -69,7 +114,12 @@ function AcessoPage() {
     queryKey: ["membros-count-cliente", clienteId],
     queryFn: async () => {
       if (!clienteId) return 0;
-      const { count } = await supabase.from("membros").select("id", { count: "exact", head: true }).eq("cliente_id", clienteId).eq("ativo", true);
+      const { count } = await supabase
+        .from("membros")
+        .select("id", { count: "exact", head: true })
+        .eq("cliente_id", clienteId)
+        .eq("ativo", true)
+        .neq("papel", "dono");
       return count ?? 0;
     },
     enabled: !!clienteId,
@@ -132,11 +182,33 @@ function AcessoPage() {
 
   const addMembro = useMutation({
     mutationFn: async () => {
-      if (!clienteId) throw new Error("Empresa não vinculada a um contrato.");
-      if (!cliente) throw new Error("Contrato não encontrado.");
-      if ((countMembrosCliente ?? 0) >= cliente.max_usuarios) {
-        throw new Error("Limite de usuários do seu plano atingido. Entre em contato para upgrade.");
+      if (!clienteId) throw new Error(
+        "Esta empresa não está vinculada a um plano. Peça ao administrador para vincular em Super Admin → Clientes → Vincular empresa."
+      );
+      if (!cliente) throw new Error("Plano não encontrado.");
+
+      const { count } = await supabase
+        .from("membros")
+        .select("id", { count: "exact", head: true })
+        .eq("cliente_id", clienteId)
+        .eq("ativo", true)
+        .neq("papel", "dono");
+
+      if ((count ?? 0) >= cliente.max_usuarios) {
+        throw new Error(
+          `Limite do plano ${cliente.plano} atingido (${cliente.max_usuarios} usuários). Entre em contato com o administrador para upgrade.`
+        );
       }
+
+      const { data: existe } = await supabase
+        .from("membros")
+        .select("id")
+        .eq("empresa_id", empresaId)
+        .eq("email", novoEmail)
+        .eq("ativo", true)
+        .maybeSingle();
+      if (existe) throw new Error("Este email já possui acesso a esta empresa.");
+
       const { error } = await supabase.from("membros").insert({
         empresa_id: empresaId, cliente_id: clienteId,
         nome: novoNome, email: novoEmail, papel: novoPapel, ativo: true,
@@ -193,7 +265,9 @@ function AcessoPage() {
 
       {!clienteId && (
         <div className="m-6 rounded-md border border-amber-500/30 bg-amber-500/10 text-amber-500 px-4 py-3 text-sm">
-          Esta empresa ainda não está vinculada a um contrato. Peça ao administrador para vincular.
+          Esta empresa ainda não está vinculada a um plano. O botão "Convidar membro"
+          ficará inativo até que o administrador do sistema vincule esta empresa a um
+          contrato em <strong>Super Admin → Clientes &amp; Contratos → Vincular empresa</strong>.
         </div>
       )}
 
@@ -203,7 +277,8 @@ function AcessoPage() {
           <button
             onClick={() => setConvidar(true)}
             disabled={!clienteId}
-            className="h-8 px-3 rounded-md bg-primary text-primary-foreground text-xs font-medium flex items-center gap-2 disabled:opacity-50">
+            title={!clienteId ? "Vincule esta empresa a um plano antes de convidar membros." : undefined}
+            className="h-8 px-3 rounded-md bg-primary text-primary-foreground text-xs font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
             <UserPlus className="size-3.5"/> Convidar membro
           </button>
         </div>
@@ -240,7 +315,11 @@ function AcessoPage() {
         </div>
         {cliente && (
           <div className="text-xs text-muted-foreground">
-            {countMembrosCliente ?? 0} de {cliente.max_usuarios} usuários do seu plano ({cliente.plano}).
+            {countMembrosCliente ?? 0} de {cliente.max_usuarios} membros do plano{" "}
+            <span className="capitalize">{cliente.plano}</span> (o dono não conta no limite).
+            {(countMembrosCliente ?? 0) >= cliente.max_usuarios && (
+              <span className="ml-1 text-amber-500 font-medium">— Limite atingido</span>
+            )}
           </div>
         )}
       </section>
@@ -328,18 +407,27 @@ function AcessoPage() {
             MODULOS.forEach(modulo => {
               const { especifica, padrao } = getPerm(papel, modulo);
               const r = especifica ?? padrao;
-              if (!r) { naoAcessa.push(modulo); return; }
-              const v = (r as any).pode_ver, c = (r as any).pode_criar, e = (r as any).pode_editar;
-              if (v) ver.push(modulo); else naoAcessa.push(modulo);
-              if (c || e) criarEditar.push(modulo);
+              let podeVer: boolean, podeCE: boolean;
+              if (r) {
+                podeVer = (r as any).pode_ver;
+                podeCE  = (r as any).pode_criar || (r as any).pode_editar;
+              } else {
+                const d = DEFAULT_PERMS[papel]?.[modulo];
+                podeVer = d?.ver ?? false;
+                podeCE  = (d?.criar || d?.editar) ?? false;
+              }
+              if (podeVer) ver.push(modulo); else naoAcessa.push(modulo);
+              if (podeCE) criarEditar.push(modulo);
             });
             return (
               <div key={papel} className="rounded-lg border border-border bg-surface p-4">
                 <div className={`inline-block text-xs px-2 py-0.5 rounded border mb-2 capitalize ${PAPEL_BADGE[papel]}`}>{papel}</div>
                 <div className="text-xs text-muted-foreground space-y-1">
-                  <div><span className="text-foreground font-medium">Pode ver:</span> {ver.join(", ") || "—"}</div>
-                  <div><span className="text-foreground font-medium">Cria/edita:</span> {criarEditar.join(", ") || "—"}</div>
-                  <div><span className="text-foreground font-medium">Não acessa:</span> {naoAcessa.join(", ") || "—"}</div>
+                  <div><span className="text-foreground font-medium">Visualiza:</span> {ver.map(m => MODULO_LABEL[m as Modulo]).join(", ") || "—"}</div>
+                  <div><span className="text-foreground font-medium">Cria / edita:</span> {criarEditar.map(m => MODULO_LABEL[m as Modulo]).join(", ") || "—"}</div>
+                  {naoAcessa.length > 0 && (
+                    <div><span className="text-foreground font-medium">Sem acesso:</span> {naoAcessa.map(m => MODULO_LABEL[m as Modulo]).join(", ")}</div>
+                  )}
                 </div>
               </div>
             );
