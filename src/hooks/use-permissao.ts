@@ -33,19 +33,6 @@ export function usePermissao(empresaId: string | undefined, modulo: ModuloPermis
       if (!membro) return negado;
       if (membro.papel === "dono") return total;
 
-      // Verificar se o módulo está liberado pelo plano do cliente
-      if (membro.cliente_id) {
-        const { data: cliente } = await supabase
-          .from("clientes")
-          .select("modulos_liberados")
-          .eq("id", membro.cliente_id)
-          .maybeSingle();
-        if (cliente && Array.isArray((cliente as any).modulos_liberados)
-            && !(cliente as any).modulos_liberados.includes(modulo)) {
-          return negado;
-        }
-      }
-
       // Permissões granulares via RPC
       const result: Record<AcaoPermissao, boolean> = { ver: false, criar: false, editar: false, excluir: false };
       for (const acao of ["ver", "criar", "editar", "excluir"] as AcaoPermissao[]) {
